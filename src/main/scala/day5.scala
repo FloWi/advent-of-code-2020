@@ -2,83 +2,84 @@ import scala.io.Source
 import java.nio.file.Paths
 import scala.collection.immutable.Nil
 
-object day5Part1 {
+package day5 {
+  import Helper._
 
-  import day5._
+  object part1 {
 
-  def main(args: Array[String]) = {
+    import day5._
 
-    val filename = args.head
+    def main(args: Array[String]) = {
 
-    val seats =
-      Source
-        .fromFile(Paths.get(filename).toAbsolutePath().toString())
-        .getLines()
-        .toList
-        .map(input => (input, Seat.parseBinary(input, 128)))
+      val seats =
+        source(args.headOption)
+          .getLines()
+          .toList
+          .map(input => (input, Seat.parseBinary(input, 128)))
 
-    println(s"found ${seats.size} seats")
-    seats
-      .foreach(println)
+      println(s"found ${seats.size} seats")
+      // seats
+      //   .foreach(println)
 
-    println("highest seatId")
-    val sorted = seats.sortBy { case (_, s) => -s.seatId }
+      println(
+        s"Solution for ${getCallingMainClass.getCanonicalName}: highest seatId: ${seats.maxBy(_._2.seatId)._2.seatId}"
+      )
+      val sorted = seats.sortBy { case (_, s) => -s.seatId }
 
-    sorted.foreach(println)
+      // sorted.foreach(println)
+    }
   }
-}
 
-object day5Part2 {
+  object part2 {
 
-  import day5._
+    import day5._
 
-  def main(args: Array[String]) = {
+    def main(args: Array[String]) = {
 
-    val filename = args.head
+      val seats =
+        source(args.headOption)
+          .getLines()
+          .toList
+          .map(input => (input, Seat.parseBinary(input, 128)))
 
-    val seats =
-      Source
-        .fromFile(Paths.get(filename).toAbsolutePath().toString())
-        .getLines()
-        .toList
-        .map(input => (input, Seat.parseBinary(input, 128)))
+      val minSeatId = seats.map(_._2.seatId).min
+      seats
+        .map(_._2)
+        .sortBy(_.seatId)
+        .sliding(2, 1)
+        .collect { case List(prev, current) =>
+          (
+            prev,
+            current,
+            prev.seatId,
+            current.seatId,
+            current.seatId - prev.seatId
+          )
+        }
+        .filter(_._5 > 1)
+        .foreach { tup =>
+          val (_, _, prevId, currentId, _) = tup
 
-    val minSeatId = seats.map(_._2.seatId).min
-    seats
-      .map(_._2)
-      .sortBy(_.seatId)
-      .sliding(2, 1)
-      .collect { case List(prev, current) =>
-        (
-          prev,
-          current,
-          prev.seatId,
-          current.seatId,
-          current.seatId - prev.seatId
-        )
-      }
-      .filter(_._5 > 1)
-      .foreach { tup =>
-        val (_, _, prevId, currentId, _) = tup
+          println(tup)
+          println(
+            s"Solution for ${getCallingMainClass.getCanonicalName}: my seat id is: ${(currentId - prevId) / 2 + prevId}"
+          )
 
-        println(tup)
-        println(s"my seat id is: ${(currentId - prevId) / 2 + prevId}")
-
-      }
+        }
+    }
   }
-}
 
-object day5 {
+  object day5 {
 
-  case class Seat(row: Int, col: Int) {
-    val seatId = row * 8 + col
+    case class Seat(row: Int, col: Int) {
+      val seatId = row * 8 + col
 
-    override def toString =
-      s"Seat(row=${row}, col=${col}, seatId=${seatId})"
-  }
-  object Seat {
+      override def toString =
+        s"Seat(row=${row}, col=${col}, seatId=${seatId})"
+    }
+    object Seat {
 
-    /*
+      /*
       The first 7 characters will either be F or B; these specify exactly one of the 128 rows on the plane (numbered 0 through 127). Each letter tells you which half of a region the given seat is in. Start with the whole list of rows; the first letter indicates whether the seat is in the front (0 through 63) or the back (64 through 127). The next letter indicates which half of that region the seat is in, and so on until you're left with exactly one row.
 
       For example, consider just the first seven characters of FBFBBFFRLR:
@@ -101,13 +102,17 @@ object day5 {
       The final R keeps the upper of the two, column 5.
       So, decoding FBFBBFFRLR reveals that it is the seat at row 44, column 5.
 
-     */
-    def parseBinary(str: String, numberOfRows: Int): Seat = {
+       */
+      def parseBinary(str: String, numberOfRows: Int): Seat = {
 
-      val rowStr = str.take(7).map(c => if (c == 'F') '0' else '1')
-      val colStr = str.takeRight(3).map(c => if (c == 'L') '0' else '1')
+        val rowStr = str.take(7).map(c => if (c == 'F') '0' else '1')
+        val colStr = str.takeRight(3).map(c => if (c == 'L') '0' else '1')
 
-      Seat(row = Integer.parseInt(rowStr, 2), col = Integer.parseInt(colStr, 2))
+        Seat(
+          row = Integer.parseInt(rowStr, 2),
+          col = Integer.parseInt(colStr, 2)
+        )
+      }
     }
   }
 }
