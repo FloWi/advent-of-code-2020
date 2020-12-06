@@ -1,8 +1,4 @@
 package day5
-import scala.io.Source
-import java.nio.file.Paths
-import scala.collection.immutable.Nil
-
 import helper.Helper._
 
 object part1 {

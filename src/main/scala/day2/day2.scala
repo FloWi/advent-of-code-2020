@@ -1,7 +1,4 @@
 package day2
-import scala.io.Source
-import java.nio.file.Paths
-
 import helper.Helper._
 
 object part1 {

@@ -1,10 +1,5 @@
 package day6
 
-import scala.io.Source
-import java.nio.file.Paths
-import scala.collection.immutable.Nil
-import scala.io.BufferedSource
-
 import helper.Helper._
 
 object part1 {

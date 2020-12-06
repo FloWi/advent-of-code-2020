@@ -1,6 +1,4 @@
 package day1
-import scala.io.Source
-
 import helper.Helper._
 
 object part1 {
