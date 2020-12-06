@@ -5,36 +5,40 @@ import scala.io.BufferedSource
 object Helper {
 
   def getCallingMainClass: Class[_] = {
-    val className = Thread.currentThread().getStackTrace().last.getClassName()
+
+    val className = Thread
+      .currentThread()
+      .getStackTrace()
+      .find { t =>
+        val name = t.getClassName()
+        name.startsWith("day") && name.contains("part") && !name.contains("$")
+      }
+      .get
+      .getClassName()
     Class.forName(className)
   }
 
-  def resourceFileByCurrentDayPackage(clazz: Class[_]): File = {
+  def resourceFileByCurrentDayPackage(clazz: Class[_]): BufferedSource = {
     println(clazz)
     val resourceNameBasedOnPackage =
       s"/${clazz.getPackageName}.txt"
-    println(resourceNameBasedOnPackage)
 
-    Paths
-      .get(clazz.getResource(resourceNameBasedOnPackage).toURI())
-      .toFile()
+    val url = clazz.getResource(resourceNameBasedOnPackage)
+    println(s"name: $resourceNameBasedOnPackage; url: $url")
+
+    Source.fromURL(url)
   }
 
   def source(
       maybeFilename: Option[String]
   ): BufferedSource = {
 
-    val filename = maybeFilename.getOrElse(
-      resourceFileByCurrentDayPackage(getCallingMainClass).getAbsolutePath()
-    )
-
-    val file = Paths.get(filename).toFile()
-
-    if (!file.exists()) {
-      throw new IllegalArgumentException(s"file $file doesn't exist")
+    maybeFilename match {
+      case Some(filename) =>
+        Source.fromFile(filename)
+      case None =>
+        resourceFileByCurrentDayPackage(getCallingMainClass)
     }
 
-    Source
-      .fromFile(file)
   }
 }
