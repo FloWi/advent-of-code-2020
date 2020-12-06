@@ -1,3 +1,4 @@
+package helper
 import java.nio.file.Paths
 import java.io.File
 import scala.io.Source
