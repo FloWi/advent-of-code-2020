@@ -76,7 +76,7 @@ object day7 {
   def searchPart2(map: LuggageInstructions, startingColor: Color): Int = {
     //starting from one color traversing the whole tree down
 
-    def helper(currentColor: Color, currentResult: Int = 0): Int = {
+    def helper(currentColor: Color, currentResult: Int = 1): Int = {
       map.get(currentColor) match {
         case Some(subMap) if subMap.isEmpty =>
           currentResult
@@ -85,19 +85,14 @@ object day7 {
           val result = subMap.map { case (color, qty) =>
             helper(color, qty.qty * currentResult)
           }.sum
-          result + currentResult
+          result + (if (currentColor == startingColor) 0 else currentResult)
 
         case None =>
           currentResult
       }
     }
 
-    map
-      .get(startingColor)
-      .map { submap =>
-        submap.map { case (color, qty) => helper(color, qty.qty) }.sum
-      }
-      .getOrElse(0)
+    helper(startingColor)
   }
 
   type LuggageInstructions = Map[Color, Map[Color, Quantity]]
@@ -110,8 +105,6 @@ object part1 {
   def main(args: Array[String]) = {
 
     val input = source(args.headOption).getLines.toList.filterNot(_.isEmpty)
-    //will default to
-    //val input = source(Some("src/main/resources/day7.txt")).mkString
 
     val luggageInstructions: LuggageInstructions =
       input.map(LuggageInstruction.parse).toMap
@@ -127,11 +120,8 @@ object part1 {
     val result = search(luggageInstructions, Color("shiny gold"))
 
     val solution = result.distinct.size
-    // println(input)
 
-    println(
-      s"Solution for ${getCallingMainClass} is: $solution"
-    )
+    println(s"Solution for ${getCallingMainClass} is: $solution")
   }
 }
 
