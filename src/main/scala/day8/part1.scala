@@ -8,7 +8,6 @@ package day8
 // 6 + 51 = 57min
 
 import helper.Helper._
-import cats.data.State
 import day8._
 
 object day8 {
