@@ -51,6 +51,9 @@ object part1 {
     val sorted = vec.sorted
     val workingVector = Vector(0) ++ sorted ++ Vector(sorted.max + 3)
 
+    //this can somehow be made tail recursive by reversing the direction of the recursion.
+    //But I can't think of a way to do so right now.
+
     val dp = collection.mutable.Map.empty[Int, Long]
     def helper(i: Int): Long = {
       if (i == workingVector.size - 1) {
