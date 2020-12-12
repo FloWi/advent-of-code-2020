@@ -159,9 +159,8 @@ object part2 {
     val height = seats.size
     val width = seats.head.size
 
-    val directionOffsets: Vector[Vector[Offset]] = directions.map {
-      case Offset(x, y) =>
-        1.to(math.max(height, width)).map(o => Offset(x * o, y * o)).toVector
+    val directionOffsets: Vector[Vector[Offset]] = directions.map { case Offset(x, y) =>
+      1.to(math.max(height, width)).map(o => Offset(x * o, y * o)).toVector
     }
 
     val positions: Vector[Position] = (for {
