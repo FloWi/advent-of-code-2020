@@ -7,9 +7,11 @@ object Helper {
 
   def getCallingMainClass: Class[_] = {
 
-    val className = Thread
+    val stacktrace = Thread
       .currentThread()
-      .getStackTrace()
+      .getStackTrace
+
+    val className = stacktrace
       .find { t =>
         val name = t.getClassName()
         name.startsWith("day") && name.contains("part") && !name.contains("$")

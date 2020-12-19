@@ -29,7 +29,7 @@ class Day15Part1Test extends AnyFunSuite with Matchers {
 
 }
 
-class Day15Part2Test extends AnyFunSuite with Matchers {
+class Day15part2Test extends AnyFunSuite with Matchers {
 
   test("example 1") {
     val input =
