@@ -133,7 +133,9 @@ object Day19 {
             }
           }.mkString
 
-          s"($recursiveRegex|$nonRecursiveRegex)"
+          val regexString = s"($recursiveRegex|$nonRecursiveRegex)"
+          println(s"recursive regex string for rule $rule: '$regexString'")
+          regexString
         } else {
           val rule1Regex = ruleRefs1.map(generateRegexString(_, ruleMap)).mkString
           val rule2Regex = ruleRefs2.map(generateRegexString(_, ruleMap)).mkString

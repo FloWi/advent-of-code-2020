@@ -48,7 +48,7 @@ nearby tickets:
 5,14,9
     """.trim
     val actual = day16.part2.solve(input.split("\n").toList)
-    val expected = 1716
+    val expected = 12 * 11 * 13
 
     actual shouldBe expected
   }
@@ -57,9 +57,8 @@ nearby tickets:
     val input = Helper.source(None).getLines.toList
 
     val actual = day16.part2.solve(input)
-    val expected = 1716
 
-    actual shouldBe expected
+    println(actual)
   }
 
 }
