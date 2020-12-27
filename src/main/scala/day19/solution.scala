@@ -55,11 +55,13 @@ object part2 {
 
     val messages = lines.drop(updatedRules.size).filterNot(_.isEmpty)
 
-    val regexString = generateRegexString(0, updatedRules)
+    val regexString = generateRegexString(0, updatedRules, isPart2 = true)
 
     println(s"regex: $regexString")
 
-    messages.count(_.matches(regexString))
+    val matchingMessages = messages.filter(_.matches(regexString))
+
+    matchingMessages.size
   }
 }
 
@@ -101,44 +103,32 @@ object Day19 {
     parseRule(rulePart)
   }
 
-  def generateRegexString(ruleId: Int, ruleMap: Map[Int, Rule]): String = {
+  def generateRegexString(ruleId: Int, ruleMap: Map[Int, Rule], isPart2: Boolean = false): String = {
 
     val rule = ruleMap(ruleId)
     println(s"generateRegexString for rule $rule")
 
     rule match {
       case SingleCharacterRule(id, char)   => char.toString
-      case OneAfterTheOtherRule(id, rules) => rules.map(generateRegexString(_, ruleMap)).mkString
+      case OneAfterTheOtherRule(id, rules) => rules.map(generateRegexString(_, ruleMap, isPart2)).mkString
       case OrRule(id, ruleRefs1, ruleRefs2) =>
-        val isRecursive1 = ruleRefs1.contains(id)
-        val isRecursive2 = ruleRefs2.contains(id)
+        if (ruleId == 8 && isPart2) {
+          generateRegexString(42, ruleMap, isPart2) + "+"
+        } else if (ruleId == 11 && isPart2) {
+          //11: 42 31 | 42 11 31
+          val r42 = generateRegexString(42, ruleMap, isPart2)
+          val r31 = generateRegexString(31, ruleMap, isPart2)
+          val r11 = 1
+            .to(40)
+            .map(n => r42 * n + r31 * n)
+            .mkString("|")
 
-        if (isRecursive1 || isRecursive2) {
-          val (recursivePart, nonRecursivePart) = {
-            if (isRecursive1 && !isRecursive2) (ruleRefs1, ruleRefs2)
-            else if (!isRecursive1 && isRecursive2) (ruleRefs2, ruleRefs1)
-            else throw new RuntimeException("can't generate regex with both parts recursive")
-          }
-
-          println(s"found recursion in rule $rule")
-
-          //generate the non-recursive part first
-          val nonRecursiveRegex = nonRecursivePart.map(generateRegexString(_, ruleMap)).mkString
-
-          val recursiveRegex = recursivePart.map { i =>
-            if (i == id) {
-              s"($nonRecursiveRegex)*"
-            } else {
-              generateRegexString(i, ruleMap)
-            }
-          }.mkString
-
-          val regexString = s"($recursiveRegex|$nonRecursiveRegex)"
-          println(s"recursive regex string for rule $rule: '$regexString'")
-          regexString
+          println(s"rule 11: ${r11.take(100)}")
+          r11
         } else {
-          val rule1Regex = ruleRefs1.map(generateRegexString(_, ruleMap)).mkString
-          val rule2Regex = ruleRefs2.map(generateRegexString(_, ruleMap)).mkString
+
+          val rule1Regex = ruleRefs1.map(generateRegexString(_, ruleMap, isPart2)).mkString
+          val rule2Regex = ruleRefs2.map(generateRegexString(_, ruleMap, isPart2)).mkString
           s"($rule1Regex|$rule2Regex)"
         }
     }

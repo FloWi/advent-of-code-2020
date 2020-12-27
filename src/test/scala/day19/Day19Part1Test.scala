@@ -105,5 +105,16 @@ aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba""".trim
     val expected = 12
 
     actual shouldBe expected
+
+    /*
+    aaaaabbaabaaaaababaa
+    abbbbabbbbaaaababbbbbbaaaababb
+    ababaaaaabbbaba
+    ababaaaaaabaaab
+    bbbbbbbaaaabbbbaaabbabaaa
+    bbabbbbaabaabba
+
+
+     */
   }
 }
