@@ -1,8 +1,10 @@
 package day19
 
+import cats.parse.{Parser, Parser1}
 import day19.Day19._
-import fastparse.parse
 import helper.Helper._
+
+import scala.annotation.tailrec
 
 object part1 {
 
@@ -19,11 +21,11 @@ object part1 {
     val rules = lines.takeWhile(_.nonEmpty).map(parseRuleLine).map(r => (r.id, r)).toMap
     val messages = lines.drop(rules.size).filterNot(_.isEmpty)
 
-    val regexString = generateRegexString(0, rules)
+    val parser = getParser(0, rules)
 
-    println(s"regex: $regexString")
+    val matchingMessages = messages.filter(msg => parser.parse(msg).isRight)
 
-    messages.count(_.matches(regexString))
+    matchingMessages.size
   }
 }
 
@@ -41,6 +43,8 @@ object part2 {
   def solve(lines: List[String]): Long = {
     val originalRules = lines.takeWhile(_.nonEmpty).map(parseRuleLine).map(r => (r.id, r)).toMap
 
+    val messages = lines.drop(originalRules.size).filterNot(_.isEmpty)
+
     val replacementRules = List(
       "8: 42 | 42 8",
       "11: 42 31 | 42 11 31"
@@ -49,17 +53,9 @@ object part2 {
       .toMap
 
     val updatedRules = originalRules ++ replacementRules
+    val parser = getParser(0, updatedRules)
 
-    println("================ updated rules ================")
-    updatedRules.toList.sortBy(_._1).foreach(println)
-
-    val messages = lines.drop(updatedRules.size).filterNot(_.isEmpty)
-
-    val regexString = generateRegexString(0, updatedRules, isPart2 = true)
-
-    println(s"regex: $regexString")
-
-    val matchingMessages = messages.filter(_.matches(regexString))
+    val matchingMessages = messages.filter(msg => parser.parse(msg).isRight)
 
     matchingMessages.size
   }
@@ -103,34 +99,33 @@ object Day19 {
     parseRule(rulePart)
   }
 
-  def generateRegexString(ruleId: Int, ruleMap: Map[Int, Rule], isPart2: Boolean = false): String = {
+  def getParser(ruleId: Int, ruleMap: Map[Int, Rule]): Parser[Unit] = {
 
-    val rule = ruleMap(ruleId)
-    println(s"generateRegexString for rule $rule")
+    import cats.parse.{Parser => P}
 
-    rule match {
-      case SingleCharacterRule(id, char)   => char.toString
-      case OneAfterTheOtherRule(id, rules) => rules.map(generateRegexString(_, ruleMap, isPart2)).mkString
-      case OrRule(id, ruleRefs1, ruleRefs2) =>
-        if (ruleId == 8 && isPart2) {
-          generateRegexString(42, ruleMap, isPart2) + "+"
-        } else if (ruleId == 11 && isPart2) {
-          //11: 42 31 | 42 11 31
-          val r42 = generateRegexString(42, ruleMap, isPart2)
-          val r31 = generateRegexString(31, ruleMap, isPart2)
-          val r11 = 1
-            .to(40)
-            .map(n => r42 * n + r31 * n)
-            .mkString("|")
+    def parser(ruleId: Int): Parser[Unit] = {
+      ruleMap(ruleId) match {
+        case SingleCharacterRule(id, char) =>
+          P.char(char)
+        case OneAfterTheOtherRule(id, rules) =>
+          chain(rules.map(id => parser(id)))
 
-          println(s"rule 11: ${r11.take(100)}")
-          r11
-        } else {
-
-          val rule1Regex = ruleRefs1.map(generateRegexString(_, ruleMap, isPart2)).mkString
-          val rule2Regex = ruleRefs2.map(generateRegexString(_, ruleMap, isPart2)).mkString
-          s"($rule1Regex|$rule2Regex)"
-        }
+        case OrRule(id, ruleRefList1, ruleRefList2) =>
+          P.oneOf(chain(ruleRefList1.map(parser)) :: chain(ruleRefList2.map(parser)) :: Nil)
+      }
     }
+
+    parser(ruleId)
+  }
+
+  def chain(rules: List[Parser[Unit]]): Parser[Unit] = {
+    @tailrec
+    def helper(rest: List[Parser[Unit]], result: Parser[Unit]): Parser[Unit] = {
+      rest match {
+        case Nil            => result
+        case ::(head, tail) => helper(tail, (result ~ head).void)
+      }
+    }
+    helper(rules, cats.parse.Parser.pure(()))
   }
 }

@@ -17,5 +17,6 @@ lazy val root = project
     // ),
     scalaVersion := "2.13.4",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.3" % Test,
-    libraryDependencies += "com.lihaoyi" %% "fastparse" % "2.2.2"
+    libraryDependencies += "com.lihaoyi" %% "fastparse" % "2.2.2",
+    libraryDependencies += "org.typelevel" %% "cats-parse" % "0.2.0"
   )
