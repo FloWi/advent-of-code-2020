@@ -1,12 +1,12 @@
 package day19
 
-import day19.Day19.{OneAfterTheOtherRule, SingleCharacterRule, _}
-import day19.part1.solve
+import day19.Day19._
+import helper.Helper
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 class Day19Part1Test extends AnyFunSuite with Matchers {
-
+  import day19.part1._
   test("example 1") {
     val input =
       """
@@ -23,98 +23,133 @@ abbbab
 aaabbb
 aaaabbb
     """.trim
-    val actual = solve(input.split("\n").toList)
+    val actual = solve(input)
     val expected = 2
 
     actual shouldBe expected
   }
-
-  test("parsing SingleCharacterRule") {
-    parseRuleLine("""
-        |1: "a"
-        |""".stripMargin.trim) shouldBe SingleCharacterRule(1, 'a')
-  }
-  test("parsing OneAfterTheOtherRule") {
-    parseRuleLine("""
-        |0: 1 2
-        |""".stripMargin.trim) shouldBe OneAfterTheOtherRule(0, List(1, 2))
-  }
-  test("parsing OrRule") {
-    // 1: 2 3 | 3 2
-    // 28: 104 | 95
-
-    parseRuleLine("""
-        |1: 2 3 | 3 2
-        |""".stripMargin.trim) shouldBe OrRule(1, List(2, 3), List(3, 2))
-  }
 }
 
 class Day19Part2Test extends AnyFunSuite with Matchers {
+  val input = Helper.source(Some("src/main/resources/day19-example-part2.txt")).mkString.trim
 
   test("example 1") {
-    val input =
-      """
-42: 9 14 | 10 1
-9: 14 27 | 1 26
-10: 23 14 | 28 1
-1: "a"
-11: 42 31
-5: 1 14 | 15 1
-19: 14 1 | 14 14
-12: 24 14 | 19 1
-16: 15 1 | 14 14
-31: 14 17 | 1 13
-6: 14 14 | 1 14
-2: 1 24 | 14 4
-0: 8 11
-13: 14 3 | 1 12
-15: 1 | 14
-17: 14 2 | 1 7
-23: 25 1 | 22 14
-28: 16 1
-4: 1 1
-20: 14 14 | 1 15
-3: 5 14 | 16 1
-27: 1 6 | 14 18
-14: "b"
-21: 14 1 | 1 14
-25: 1 1 | 1 14
-22: 14 14
-8: 42
-26: 14 22 | 1 20
-18: 15 15
-7: 14 5 | 1 21
-24: 14 1
 
-abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa
-bbabbbbaabaabba
-babbbbaabbbbbabbbbbbaabaaabaaa
-aaabbbbbbaaaabaababaabababbabaaabbababababaaa
-bbbbbbbaaaabbbbaaabbabaaa
-bbbababbbbaaaaaaaabbababaaababaabab
-ababaaaaaabaaab
-ababaaaaabbbaba
-baabbaaaabbaaaababbaababb
-abbbbabbbbaaaababbbbbbaaaababb
-aaaaabbaabaaaaababaa
-aaaabbaaaabbaaa
-aaaabbaabbaaaaaaabbbabbbaaabbaabaaa
-babaaabbbaaabaababbaabababaaab
-aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba""".trim
-    val actual = part2.solve(input.split("\n").toList)
+    val actual = part2.solve(input)
     val expected = 12
 
     actual shouldBe expected
+  }
 
-    /*
-    aaaaabbaabaaaaababaa
-    abbbbabbbbaaaababbbbbbaaaababb
-    ababaaaaabbbaba
-    ababaaaaaabaaab
-    bbbbbbbaaaabbbbaaabbabaaa
-    bbabbbbaabaabba
+  test("rule expansion part1") {
 
+    val List(rulesStr, messagesStr) = input.split("\n\n").toList
+    val rules = rulesStr.split("\n").toList
+    val messages = messagesStr.split("\n").toList
 
-     */
+    val ruleMap = parseRuleMap(rules)
+
+    val expanded = expand(ruleMap)
+
+    expanded.size shouldBe rules.size
+
+    println("========================")
+    println("rule #8:")
+    println(expanded(8))
+
+    println("========================")
+    println("rule #31:")
+    println(expanded(31))
+
+    println("========================")
+    println("rule #42:")
+    println(expanded(42))
+
+    println("========================")
+    println("rule #0:")
+    println(expanded(0))
+    val pattern = expanded(0).r
+    val validMessages = messages.filter(pattern.matches)
+    println(s"${validMessages.size} out of ${messages.size} are valid")
+  }
+
+  test("rule expansion part2") {
+    val input = Helper.source(Some("src/main/resources/day19.txt")).mkString.trim
+
+    val List(rulesStr, messagesStr) = input.split("\n\n").toList
+    val rules = rulesStr.split("\n").toList
+    val messages = messagesStr.split("\n").toList
+
+    val ruleMap = parseRuleMap(rules)
+      .updated(8, "42 | 42 8")
+      .updated(11, "42 31 | 42 11 31")
+
+    val expanded = expand(ruleMap)
+    val broken = expanded.filter(_._2.contains("{("))
+    println("broken rules:")
+    broken.toList.sorted.foreach(println)
+
+    expanded.size shouldBe rules.size
+
+    println("========================")
+    println("rule #8:")
+    println(expanded(8))
+
+    println("========================")
+    println("rule #11:")
+    println(expanded(11))
+
+    println("========================")
+    println("rule #31:")
+    println(expanded(31))
+
+    println("========================")
+    println("rule #42:")
+    println(expanded(42))
+
+    println("========================")
+    println("rule #0:")
+    println(expanded(0))
+    val pattern = expanded(0).r
+    val validMessages = messages.filter(pattern.matches)
+    println(s"${validMessages.size} out of ${messages.size} are valid")
+  }
+
+  test("rule simplififaction") {
+
+    simplifyOrRule("(a|b)a") shouldBe "aa|ba"
+    simplifyOrRule("a(a|b)") shouldBe "aa|ab"
+    simplifyOrRule("(a|b)") shouldBe "a|b"
+    simplifyOrRule("ab|(a|b)a|c") shouldBe "ab|aa|ba|c"
+    simplifyOrRule("(a|b)(a|b)") shouldBe "aa|ab|ba|bb"
+  }
+
+  test("braced or term") {
+    import cats.parse.{Parser => P}
+    val word = P.charsWhile1(_.isLetter)
+
+    val orTerm = P.repSep(word, 2, P.char('|'))
+    val bracedOrTerm = orTerm.between(P.char('('), P.char(')'))
+
+    val rule = "(a|b)"
+    val actual = bracedOrTerm.parse(rule)
+    actual.right.get._2 shouldBe List("a", "b")
+
+  }
+  test("braced or term 2") {
+    import cats.parse.{Parser => P}
+    val word = P.charsWhile1(_.isLetter)
+
+    val orTerm = P.repSep(word, 2, P.char('|'))
+    val bracedOrTerm = orTerm.between(P.char('('), P.char(')'))
+
+    val bracedOrTermWithoutBraces = bracedOrTerm.map { terms =>
+      println("terms: ")
+      println(terms)
+      terms.mkString("|")
+    }
+    val rule = "(a|b)"
+    val actual = bracedOrTermWithoutBraces.parse(rule)
+    actual.right.get._2 shouldBe "a|b"
   }
 }

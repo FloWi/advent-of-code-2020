@@ -1,31 +1,34 @@
 package day19
 
-import cats.parse.{Parser, Parser1}
 import day19.Day19._
 import helper.Helper._
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 object part1 {
 
   def main(args: Array[String]): Unit = {
 
-    val input = source(args.headOption).getLines.toList
+    val input = source(args.headOption).mkString
 
     val solution = solve(input)
 
     println(s"Solution for ${getCallingMainClass} is: $solution")
   }
 
-  def solve(lines: List[String]): Long = {
-    val rules = lines.takeWhile(_.nonEmpty).map(parseRuleLine).map(r => (r.id, r)).toMap
-    val messages = lines.drop(rules.size).filterNot(_.isEmpty)
+  def solve(input: String): Long = {
+    val List(rulesStr, messagesStr) = input.split("\n\n").toList
+    val rules = rulesStr.split("\n").toList
+    val messages = messagesStr.split("\n").toList
 
-    val parser = getParser(0, rules)
+    val ruleMap = parseRuleMap(rules)
 
-    val matchingMessages = messages.filter(msg => parser.parse(msg).isRight)
-
-    matchingMessages.size
+    val expanded = expand(ruleMap)
+    val pattern = expanded(0).r
+    val validMessages = messages.filter(pattern.matches)
+    println(s"${validMessages.size} out of ${messages.size} are valid")
+    validMessages.size
   }
 }
 
@@ -33,99 +36,202 @@ object part2 {
 
   def main(args: Array[String]): Unit = {
 
-    val input = source(args.headOption).getLines.toList
+    val input = source(args.headOption).mkString
 
     val solution = solve(input)
 
     println(s"Solution for ${getCallingMainClass} is: $solution")
   }
 
-  def solve(lines: List[String]): Long = {
-    val originalRules = lines.takeWhile(_.nonEmpty).map(parseRuleLine).map(r => (r.id, r)).toMap
+  def solve(input: String): Long = {
+    val List(rulesStr, messagesStr) = input.split("\n\n").toList
+    val rules = rulesStr.split("\n").toList
+    val messages = messagesStr.split("\n").toList
 
-    val messages = lines.drop(originalRules.size).filterNot(_.isEmpty)
+    val ruleMap = parseRuleMap(rules)
+      .updated(8, "42 | 42 8")
+      .updated(11, "42 31 | 42 11 31")
 
-    val replacementRules = List(
-      "8: 42 | 42 8",
-      "11: 42 31 | 42 11 31"
-    ).map(parseRuleLine)
-      .map(r => (r.id, r))
-      .toMap
-
-    val updatedRules = originalRules ++ replacementRules
-    val parser = getParser(0, updatedRules)
-
-    val matchingMessages = messages.filter(msg => parser.parse(msg).isRight)
-
-    matchingMessages.size
+    val expanded = expand(ruleMap)
+    val pattern = expanded(0).r
+    val validMessages = messages.filter(pattern.matches)
+    println(s"${validMessages.size} out of ${messages.size} are valid")
+    validMessages.size
   }
 }
 
 object Day19 {
 
-  sealed trait Rule {
-    def id: Int
-  }
-  case class SingleCharacterRule(id: Int, char: Char) extends Rule
-  case class OneAfterTheOtherRule(id: Int, rules: List[Int]) extends Rule
-  case class OrRule(id: Int, ruleRefList1: List[Int], ruleRefList2: List[Int]) extends Rule
+  def canBeExpanded(rule: String, expanded: Map[Int, String]): Boolean = {
+    if (rule.contains("\"")) {
+      true
+    } else {
+      val ruleIds = rule.split(" \\| ").flatMap(r => r.split(" ")).map(_.toInt).toSet
 
-  def parseRuleLine(line: String): Rule = {
-
-    val List(id, rulePart) = line.split(": ").toList
-
-    def parseRule(rulePart: String): Rule = {
-      if (rulePart.contains("|")) {
-        //or rule
-        // e.g.
-        // 1: 2 3 | 3 2
-        // 28: 104 | 95
-        val parts = rulePart.split(" \\| ").toList
-
-        val List(ruleRefs1, ruleRefs2) = parts.map(_.split(" ").map(_.toInt).toList)
-
-        OrRule(id.toInt, ruleRefs1, ruleRefs2)
-
-      } else if (rulePart.contains("\"")) {
-        //single char rule
-        SingleCharacterRule(id.toInt, rulePart.replace("\"", "").head)
-      } else {
-        //one after the other rule
-        val rules = rulePart.split(" ").map(_.toInt).toList
-        OneAfterTheOtherRule(id.toInt, rules)
-      }
+      ruleIds.diff(expanded.keySet).isEmpty
     }
-
-    parseRule(rulePart)
   }
 
-  def getParser(ruleId: Int, ruleMap: Map[Int, Rule]): Parser[Unit] = {
+  def expandRule(rule: String, expandable: Set[Int], resolved: Map[Int, String]): String = {
+
+    //if any of the rules contains a regex-repetition token e.g.'{2}', don't simplify the expression
+
+    val resolvedRules = "\\d+".r
+      .findAllIn(rule)
+      .toList
+      .map(_.toInt)
+      .map(resolved.apply)
+
+    val containsRegexRepetition = resolvedRules.exists(_.contains("{"))
+
+    if (containsRegexRepetition) {
+      "\\d+".r
+        .findAllIn(rule)
+        .toList
+        .map(_.toInt)
+        .map(resolved.apply)
+        .mkString("")
+    } else {
+
+      //sort descending so 14 will be replaced before 1 and 4 only replace parts of it
+
+      val expanded = expandable.toList.sorted.reverse
+        .foldLeft(rule) { (acc, id) =>
+          val replacement = resolved(id)
+          val replacedString = if (replacement.contains("|")) s"(${replacement})" else replacement
+          acc.replace(id.toString, replacedString)
+        }
+        .replaceAll("\\s+", "")
+
+      simplifyOrRule(expanded)
+    }
+  }
+
+  @tailrec
+  def simplifyOrRule(rule: String): String = {
 
     import cats.parse.{Parser => P}
 
-    def parser(ruleId: Int): Parser[Unit] = {
-      ruleMap(ruleId) match {
-        case SingleCharacterRule(id, char) =>
-          P.char(char)
-        case OneAfterTheOtherRule(id, rules) =>
-          chain(rules.map(id => parser(id)))
+    //  (a|b)c     ==> ac|bc
+    //  (a|b)      ==> a|b
+    // c(a|b)      ==> ca|cb
+    // ab|(a|b)a|c ==> ab|aa|ba|c
+    val term = P.charsWhile1(_.isLetter)
+    val orTerm = P.repSep(term, 2, P.char('|')).backtrack
+    val bracedOrTerm = orTerm.between(P.char('('), P.char(')')).backtrack
+    val twoBracedOrTerms = (bracedOrTerm ~ bracedOrTerm).backtrack
 
-        case OrRule(id, ruleRefList1, ruleRefList2) =>
-          P.oneOf(chain(ruleRefList1.map(parser)) :: chain(ruleRefList2.map(parser)) :: Nil)
-      }
+    val orTermWithFactorParser = (term.? ~ bracedOrTerm ~ term.?).map { case ((maybeLeft, orTerms), maybeRight) =>
+      orTerms
+        .map(orTerm => maybeLeft.getOrElse("") + orTerm + maybeRight.getOrElse(""))
+        .mkString("|")
     }
 
-    parser(ruleId)
+    val twoBracedTermsParser = twoBracedOrTerms.map { case (l1, l2) =>
+      val result = (for {
+        t1 <- l1
+        t2 <- l2
+      } yield t1 + t2)
+
+      result.mkString("|")
+    }
+
+    val parser = P.oneOf(twoBracedTermsParser :: orTermWithFactorParser :: Nil)
+
+    val indices = 0 :: "\\|".r.findAllMatchIn(rule).map(_.start + 1).toList
+    val maybeUpdatedRule = indices.flatMap { i =>
+      val (first, second) = rule.splitAt(i)
+      val res = parser.parse(second)
+      res match {
+        case Left(_) => List.empty
+        case Right((rest, result)) =>
+          List(first + result + rest)
+      }
+    }.headOption
+
+    val result = maybeUpdatedRule.getOrElse(rule)
+    if (result != rule) {
+      simplifyOrRule(result)
+    } else {
+      result
+    }
+
   }
 
-  def chain(rules: List[Parser[Unit]]): Parser[Unit] = {
+  def parseRuleMap(rules: List[String]): Map[Int, String] = {
+    val ruleMap = rules.map { line =>
+      val List(id, ruleString) = line.split(": ").toList
+
+      id.toInt -> ruleString
+    }.toMap
+
+    ruleMap.toList.sorted.foreach(println)
+
+    ruleMap
+  }
+
+  def expand(ruleMap: Map[Int, String]): Map[Int, String] = {
+
     @tailrec
-    def helper(rest: List[Parser[Unit]], result: Parser[Unit]): Parser[Unit] = {
-      rest match {
-        case Nil            => result
-        case ::(head, tail) => helper(tail, (result ~ head).void)
+    def helper(working: Map[Int, String], resolved: Map[Int, String]): Map[Int, String] = {
+      if (working.isEmpty) {
+        resolved
+      } else {
+
+        val nonExpandedIds = ruleMap.keySet.diff(resolved.keySet)
+
+        val ruleToExpand = nonExpandedIds
+          .find { id =>
+            val rule = ruleMap(id)
+            canBeExpanded(rule, resolved)
+          }
+          .map(id => id -> working(id))
+
+        ruleToExpand match {
+
+          case Some((id, rule)) if rule.contains("\"") =>
+            helper(working.removed(id), resolved.updated(id, rule.replace("\"", "")))
+
+          case Some((id, rule)) =>
+            val ruleReferences = rule.split(" \\| ").toList.flatMap(r => r.split(" ")).flatMap { tok => Try(tok.toInt).toOption.toList }.toSet
+            val expandable = ruleReferences.intersect(resolved.keySet)
+            val nonExpandable = ruleReferences.diff(expandable)
+
+            if (nonExpandable.isEmpty) {
+              helper(working.removed(id), resolved.updated(id, expandRule(rule, expandable, resolved)))
+            } else {
+
+              ???
+            }
+
+          case None =>
+            if (nonExpandedIds.contains(8) && resolved.contains(42)) {
+              // 8: 42 | 42 8
+              val rule42 = resolved(42)
+              val newRule8 = s"($rule42)+"
+              helper(working.removed(8), resolved.updated(8, newRule8))
+            } else if (nonExpandedIds.contains(11) && resolved.contains(31) && resolved.contains(42)) {
+
+              // 11: 42 31 | 42 11 31
+              val rule31 = resolved(31)
+              val rule42 = resolved(42)
+              val newRule11 = 1
+                .to(10)
+                .map { i =>
+                  val regex = s"(($rule42){$i}($rule31){$i})"
+                  regex
+                }
+                .mkString("|")
+
+              helper(working.removed(11), resolved.updated(11, s"($newRule11)"))
+            } else
+              throw new RuntimeException("nothing to expand")
+        }
       }
     }
-    helper(rules, cats.parse.Parser.pure(()))
+
+    helper(ruleMap, Map.empty)
+
   }
+
 }
