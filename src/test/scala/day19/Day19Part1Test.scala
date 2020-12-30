@@ -451,8 +451,9 @@ aaaaaabb
 
     val parser = repeat1Until(parser42, parser11)
 
-    val results = messages.map(parser.parse)
-    val numberValid = results.count(_.isRight)
-    numberValid shouldBe 400
+    val results = messages.map(msg => (msg, parser.parseAll(msg)))
+    val validResults = results.filter(_._2.isRight)
+    val validMessages = validResults.map(_._1)
+    validMessages.size shouldBe 400
   }
 }

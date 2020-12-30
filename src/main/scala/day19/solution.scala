@@ -56,6 +56,7 @@ object part2 {
     val pattern = expanded(0).r
     val validMessages = messages.filter(pattern.matches)
     println(s"${validMessages.size} out of ${messages.size} are valid")
+    //println(validMessages.map(msg => s""""$msg"""").mkString("List(", ",\n", ")"))
     validMessages.size
   }
 }
