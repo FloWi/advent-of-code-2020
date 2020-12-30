@@ -5,27 +5,67 @@ import helper.Helper
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-import java.awt.{Color, Rectangle}
-import java.awt.image.{BufferedImage, DataBufferByte, DataBufferInt}
-import java.nio.file.{Files, Paths}
+import java.awt.Color
+import java.awt.image.BufferedImage
+import java.nio.file.Files
 import javax.imageio.ImageIO
 
 class Day20Part1Test extends AnyFunSuite with Matchers {
+  private val input = Helper.source(Some("src/main/resources/day20-example.txt")).mkString
+  private val tileMap = parseTiles(input)
+  private val transformedTileMap = getTileTransformations(tileMap)
 
   test("example 1") {
-    val input = Helper.source(Some("src/main/resources/day20-example.txt")).mkString
-    val tileMap = parseTiles(input)
 
-    val transformedTileMap = getTileTransformations(tileMap)
+    val cornerPieces = findCornerPieces(transformedTileMap)
 
-    //findCornerPieces(transformedTileMap)
+    cornerPieces should contain theSameElementsAs List(1951, 3079, 2971, 1171)
 
-    writeTransformedTilesToDisk(transformedTileMap)
+    val solution = cornerPieces.map(_.toLong).product
 
-    val transformedTiles: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])] = getTileTransformations(tileMap)
+    println(s"solution part1: $solution")
 
-    val expected = 2
+    //writeTransformedTilesToDisk(transformedTileMap)
+  }
 
+  test("orient edges") {
+    val edges = orientEdges(outerEdgesUnsorted(transformedTileMap))
+
+    edges shouldBe Edges(
+      topEdgeLeftToRight = List(1171, 1489, 2971),
+      leftEdgeTopToBottom = List(1171, 2473, 3079),
+      rightEdgeTopToBottom = List(2971, 2729, 1951),
+      bottomEdgeLeftToRight = List(3079, 2311, 1951)
+    )
+
+  }
+
+  test("assemble outer edges") {
+    val edges = orientEdges(outerEdgesUnsorted(transformedTileMap))
+    val outerEdges = assembleVectorWithOuterEdges(edges)
+
+    val expected = Vector(
+      Vector(Some(1171), Some(1489), Some(2971)),
+      Vector(Some(2473), None, Some(2729)),
+      Vector(Some(3079), Some(2311), Some(1951))
+    )
+
+    outerEdges shouldBe expected
+  }
+
+  test("find corners of outer edges") {
+
+    val paths = outerEdgesUnsorted(transformedTileMap)
+      .sortBy(_._3 * -1)
+
+    paths.map { case (from, to, _, _) => (from, to) } should contain theSameElementsAs List(
+      (1951, 3079),
+      (1951, 2971),
+      (1171, 2971),
+      (1171, 3079)
+    )
+
+    paths.foreach(println)
   }
 
   def writeTransformedTilesToDisk(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): Unit = {

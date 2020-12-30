@@ -1,9 +1,10 @@
 package day20
 
+import day20.Day20.{findCornerPieces, getTileTransformations, parseTiles}
+import day20.Dijkstra.{Graph, shortestPath}
 import helper.Helper._
 
 import java.awt.Color
-import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 
 object part1 {
@@ -12,13 +13,14 @@ object part1 {
 
     val input = source(args.headOption).mkString
 
-    val solution = "not yet" //solve(input)
+    val tileMap = parseTiles(input)
 
+    val transformedTileMap = getTileTransformations(tileMap)
+
+    val cornerPieces = findCornerPieces(transformedTileMap)
+
+    val solution = cornerPieces.map(_.toLong).product
     println(s"Solution for ${getCallingMainClass} is: $solution")
-  }
-
-  def solve(lines: List[String]): Long = {
-    ???
   }
 }
 
@@ -62,41 +64,63 @@ object Day20 {
     }
   }
 
-  def findCornerPieces(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): Unit = {
-    val result: List[(Int, Int, Int, List[Transformation])] =
-      transformedTileMap.keys.toList.sorted
-        .combinations(2)
-        .toList
-        .flatMap { case List(id1, id2) =>
-          val tile1 = transformedTileMap(id1)
-          val tile2 = transformedTileMap(id2)
+  def getEdges(img: BufferedImage): List[Int] = {
+    List(
+      top(img),
+      bottom(img),
+      left(img),
+      right(img)
+    )
+  }
 
-          val tile1Top = top(tile1._1)
-          val tile1Bottom = bottom(tile1._1)
-          val tile1Left = left(tile1._1)
-          val tile1Right = right(tile1._1)
+  def findNeighbors(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): List[List[Int]] = {
+    val edges = transformedTileMap.values.flatMap { case (_, map) =>
+      map.values.flatMap(getEdges).toSet
+    }.toSet
 
-          tile2._2.flatMap { case (t, img2Transformed) =>
-            val tile2Top = top(img2Transformed)
-            val tile2Bottom = bottom(img2Transformed)
-            val tile2Left = left(img2Transformed)
-            val tile2Right = right(img2Transformed)
+    val matches = edges
+      .map { edgeHash =>
+        val tilesWithThisEdge = transformedTileMap.filter { case (id, (_, transformations)) =>
+          transformations.values.flatMap(getEdges).toList.contains(edgeHash)
+        }.keys
+        (edgeHash, tilesWithThisEdge.toList.sorted)
+      }
+      .toList
+      .sortBy(_._1)
 
-            val matchingEdge: Option[Int] = {
-              if (tile1Top == tile2Bottom)
-                Some(tile1Top)
-              else if (tile1Bottom == tile2Top)
-                Some(tile1Bottom)
-              else if (tile1Left == tile2Right)
-                Some(tile1Left)
-              else if (tile1Right == tile2Left)
-                Some(tile1Right)
-              else None
-            }
+    val denormalizedMatches = matches.flatMap { case (edgeHash, ids) => ids.map(id => (edgeHash, id)) }.sortBy(_._2)
 
-            matchingEdge.map(e => (e, id1, id2, t))
-          }
-        }
+    //    println("edgehash -- id")
+    //    denormalizedMatches.foreach(println)
+
+    val neighbors = denormalizedMatches
+      .groupBy(_._1)
+      .view
+      .mapValues(_.map(_._2).sorted)
+      .filter(_._2.size > 1)
+      .values
+      .toList
+      .distinct
+
+    neighbors
+  }
+
+  def findCornerPieces(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): List[Int] = {
+    findCornerPiecesByNeighbors(findNeighbors(transformedTileMap))
+  }
+  def findCornerPiecesByNeighbors(neighbors: List[List[Int]]): List[Int] = {
+
+    val sharedEdgesPerTile = neighbors
+      .flatMap { ids => ids.map(id => (id, 1)) }
+      .groupBy { case (id, _) => id }
+      .view
+      .mapValues(_.map(_._2).sum)
+      .toList
+
+    sharedEdgesPerTile
+      .filter(_._2 == 2)
+      .map(_._1)
+
   }
 
   def applyTransformations(image: BufferedImage, transformationList: List[Transformation]): BufferedImage = {
@@ -222,6 +246,95 @@ object Day20 {
       .mkString
 
     Integer.parseInt(binary, 2)
+  }
+
+  def findPath(from: Int, to: Int, neighbors: List[List[Int]]) = {
+
+    //1951 --> 2311 --> 3079
+
+    val graph: Graph[Int] = neighbors.groupBy(_.head).view.mapValues { l => l.map(_.last -> 1).toMap }
+    val result = shortestPath(graph)(from, to)
+
+    result
+  }
+
+  def outerEdgesUnsorted(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): List[(Int, Int, Int, List[Int])] = {
+    val neighbors = findNeighbors(transformedTileMap)
+
+    //find path between two cornerpieces
+
+    val cornerPieces = findCornerPiecesByNeighbors(neighbors)
+
+    val neighborDiGraph = neighbors
+      .flatMap { list =>
+        List(list, list.reverse)
+      }
+
+    val paths = cornerPieces.sorted
+      .combinations(2)
+      .toList
+      .map { case List(c1, c2) =>
+        val path = findPath(c1, c2, neighborDiGraph)
+        (c1, c2, path.map(_.size).get, path.get)
+      }
+
+    //there are 4 edges
+    paths.sortBy(_._3).take(4)
+
+  }
+
+  case class Edges(topEdgeLeftToRight: List[Int], leftEdgeTopToBottom: List[Int], rightEdgeTopToBottom: List[Int], bottomEdgeLeftToRight: List[Int])
+
+  def orientEdges(edgesUnsorted: List[(Int, Int, Int, List[Int])]): Edges = {
+    val assumedTopEdge :: rest = edgesUnsorted.map(_._4)
+
+    val n = assumedTopEdge.size
+
+    val topLeft = assumedTopEdge.head
+    val topRight = assumedTopEdge.last
+
+    val leftEdge = rest.find(_.contains(topLeft)).get
+    val rightEdge = rest.find(_.contains(topRight)).get
+
+    val leftEdgeTopToBottom = if (leftEdge.head == topLeft) leftEdge else leftEdge.reverse
+    val rightEdgeTopToBottom = if (rightEdge.head == topRight) rightEdge else rightEdge.reverse
+
+    val bottomLeft = (leftEdgeTopToBottom.head :: leftEdgeTopToBottom.last :: Nil).diff(List(topLeft)).head
+
+    val bottomEdge = rest.diff(List(leftEdge, rightEdge)).head
+    val bottomEdgeLeftToRight = if (bottomEdge.head == bottomLeft) bottomEdge else bottomEdge.reverse
+
+    Edges(assumedTopEdge, leftEdgeTopToBottom, rightEdgeTopToBottom, bottomEdgeLeftToRight)
+
+  }
+
+  def assembleVectorWithOuterEdges(edges: Edges): Vector[Vector[Option[Int]]] = {
+
+    val Edges(topEdgeLeftToRight, leftEdgeTopToBottom, rightEdgeTopToBottom, bottomEdgeLeftToRight) = edges
+
+    val n = topEdgeLeftToRight.size
+
+    println(s"     top edge: ${topEdgeLeftToRight.mkString(",")}")
+    println(s"    left edge: ${leftEdgeTopToBottom.mkString(",")}")
+    println(s"   right edge: ${rightEdgeTopToBottom.mkString(",")}")
+    println(s"  bottom edge: ${bottomEdgeLeftToRight.mkString(",")}")
+
+    val coordsOfEdges = List(
+      topEdgeLeftToRight.zipWithIndex.map { case (id, x) => (x, 0, id) },
+      leftEdgeTopToBottom.zipWithIndex.map { case (id, y) => (0, y, id) },
+      rightEdgeTopToBottom.zipWithIndex.map { case (id, y) => (n - 1, y, id) },
+      bottomEdgeLeftToRight.zipWithIndex.map { case (id, x) => (x, n - 1, id) }
+    ).flatten
+
+    val emptyVector: Vector[Vector[Option[Int]]] = Vector.fill(n)(Vector.fill(n)(None))
+    val result = coordsOfEdges.foldLeft(emptyVector) { case (acc, (x, y, id)) =>
+      val row = acc(y)
+      val updatedRow = row.updated(x, Some(id))
+
+      acc.updated(y, updatedRow)
+    }
+
+    result
   }
 
 }
