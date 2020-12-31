@@ -25,7 +25,7 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
 
     println(s"solution part1: $solution")
 
-    //writeTransformedTilesToDisk(transformedTileMap)
+    writeTransformedTilesToDisk(transformedTileMap)
   }
 
   test("find corners of outer edges") {
@@ -42,8 +42,6 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
       (1171, 2971),
       (1171, 3079)
     )
-
-    paths.foreach(println)
   }
 
   test("orient edges") {
@@ -59,7 +57,6 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
       rightEdgeTopToBottom = List(2971, 2729, 1951),
       bottomEdgeLeftToRight = List(3079, 2311, 1951)
     )
-
   }
 
   test("assemble outer edges") {
@@ -91,6 +88,80 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
     allTiles shouldBe expected
   }
 
+  test("transform tiles to match") {
+
+    val edges = calcEdges(transformedTileMap)
+
+    val edgeMatches: Map[Int, List[Int]] = edges.toList
+      .flatMap { case (id, (_, edgeMap)) =>
+        val edgeHashes = edgeMap.values.flatMap(_._2)
+        edgeHashes.map(hash => (hash, id))
+      }
+      .groupBy(_._1)
+      .mapValues(_.map(_._2).distinct)
+      .toMap
+
+    val leftTop = edges(1951)
+    val middleTop = edges(2311)
+    val leftMiddle = edges(2729)
+
+    def printEdges(img: BufferedImage, additional: Option[String] = None): Unit = {
+
+      val t = top(img)
+      val b = bottom(img)
+      val l = left(img)
+      val r = right(img)
+
+      println(s"top: $t; right: $r; bottom: $b; left: $l${additional.getOrElse("")}")
+    }
+
+    printEdges(leftTop._1, Some("; top-left original"))
+
+    val leftTopTransformations = leftTop._2.toList.map { case (transformations, (img, edgeHashes)) => (transformations, img, edgeHashes.toSet) }
+    val middleTopTransformations = middleTop._2.toList.map { case (transformations, (img, edgeHashes)) => (transformations, img, edgeHashes.toSet) }
+    val leftMiddleTransformations = leftMiddle._2.toList.map { case (transformations, (img, edgeHashes)) => (transformations, img, edgeHashes.toSet) }
+
+    //find two edges, that only the top-left tile has (the top one and the left one)
+    val outerEdgesOfTopLeftTile = edgeMatches.filter(_._2 == List(1951)).keys.toSet
+    println(s"edges of top left tile without matching other tile - these have to be on the outer side: ${outerEdgesOfTopLeftTile.toList.sorted.mkString(", ")}")
+
+    //find the transformations, after which those edges are top and left
+    val validTransformationsLeftTop = leftTopTransformations.filter { case (_, img, _) =>
+      val isTop = outerEdgesOfTopLeftTile.contains(top(img))
+      val isLeft = outerEdgesOfTopLeftTile.contains(left(img))
+      isTop && isLeft
+    }
+    validTransformationsLeftTop.foreach(tup => printEdges(tup._2, Some(s"; valid transformations: ${tup._1}")))
+
+    //find right edges of topLeft tile after transformations
+    val rightEdgesOfTopLeftAfterTransformations = validTransformationsLeftTop.map(_._2).map(right).toSet
+    // 318, 710
+
+    //find bottom edges of topLeft tile after transformations
+    val bottomEdgesOfTopLeftAfterTransformations = validTransformationsLeftTop.map(_._2).map(bottom).toSet
+    // also 318, 710
+
+    println()
+    printEdges(middleTop._1, Some("; middleTop original"))
+
+    val validTransformationsOfMiddleTop = middleTopTransformations.filter(t => rightEdgesOfTopLeftAfterTransformations.contains(left(t._2)))
+    println(s"found ${validTransformationsOfMiddleTop.size} transformations, where the left side of middleTop matches the right side of leftTop")
+    validTransformationsOfMiddleTop.foreach { case (transformations, img, _) =>
+      printEdges(img, Some(s"; transformations: $transformations"))
+    }
+    println()
+    printEdges(leftMiddle._1, Some("; leftMiddle original"))
+
+    val validTransformationsOfLeftMiddle = leftMiddleTransformations.filter(t => bottomEdgesOfTopLeftAfterTransformations.contains(top(t._2)))
+    println(s"found ${validTransformationsOfLeftMiddle.size} transformations, where the top side of leftMiddle matches the bottom side of leftTop")
+    validTransformationsOfLeftMiddle.foreach { case (transformations, img, _) =>
+      printEdges(img, Some(s"; transformations: $transformations"))
+    }
+
+    ???
+
+  }
+
   def writeTransformedTilesToDisk(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): Unit = {
     val tempFolder = Files.createTempDirectory("AOC2020_day20_")
     transformedTileMap.foreach { case (id, (original, transformations)) =>
@@ -105,22 +176,28 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
   }
 
   test("which transformations yield the same result") {
-    val startImage = new BufferedImage(3, 3, BufferedImage.TYPE_INT_RGB)
+    val startImage = new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB)
     val coords: List[(Int, Int, Int)] = for {
       x <- 0.until(startImage.getWidth).toList
       y <- 0.until(startImage.getHeight).toList
-    } yield (x, y, (x * 3 + y) * 28)
+    } yield (x, y, (x * 4 + y) * 15)
 
     coords.foreach { case (x, y, colorValue) => startImage.setRGB(x, y, new Color(colorValue, 0, 0).getRGB) }
+    val tempFolder = Files.createTempDirectory("AOC2020_day20_")
+    ImageIO.write(startImage, "png", tempFolder.resolve(s"start_image - hash - ${getImageHash(startImage, coords)}.png").toFile)
 
     val transformedImages = allTransformations
       .map(transformationList => (transformationList, applyTransformations(startImage, transformationList)))
       .map { case (transformationList, img) => (transformationList, img, getImageHash(img, coords)) }
 
+    transformedImages.foreach { case (transformations, img, hash) =>
+      ImageIO.write(img, "png", tempFolder.resolve(s"image - hash - $hash - ${transformations.mkString}.png").toFile)
+
+    }
     val grouped = transformedImages.groupBy(_._3)
     grouped.foreach(println)
 
-    val distinctTransformations = grouped.map(_._2.head._1)
+    val distinctTransformations = grouped.map(_._2.sortBy(_.toString.size).head._1)
 
     println(s"all ${allTransformations.size} transformations")
 

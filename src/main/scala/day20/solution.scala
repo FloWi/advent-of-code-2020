@@ -74,13 +74,19 @@ object Day20 {
     )
   }
 
+  def calcEdges(
+      transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]
+  ): Map[Int, (BufferedImage, Map[List[Transformation], (BufferedImage, List[Int])])] = {
+    transformedTileMap.view.mapValues { case (original, transformationMap) =>
+      val edgeMap = transformationMap.view.mapValues(img => (img, getEdges(img)))
+      original -> edgeMap.toMap
+    }.toMap
+
+  }
+
   def findNeighbors(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): List[List[Int]] = {
 
-    val edges: Map[Int, (BufferedImage, MapView[List[Transformation], (BufferedImage, List[Int])])] = transformedTileMap.view.mapValues {
-      case (original, transformationMap) =>
-        val edgeMap = transformationMap.view.mapValues(img => (img, getEdges(img)))
-        original -> edgeMap
-    }.toMap
+    val edges = calcEdges(transformedTileMap)
 
     val edgeMatches: Map[Int, List[Int]] = edges.toList
       .flatMap { case (id, (_, edgeMap)) =>
@@ -152,11 +158,11 @@ object Day20 {
       case Clockwise270 =>
         AffineTransform.getRotateInstance(math.toRadians(270), image.getWidth / 2, image.getHeight / 2)
 
-      case FlipVertical =>
+      case FlipHorizontal =>
         val tx = AffineTransform.getScaleInstance(-1, 1)
         tx.translate(-w, 0)
         tx
-      case FlipHorizontal =>
+      case FlipVertical =>
         val tx = AffineTransform.getScaleInstance(1, -1)
         tx.translate(0, -h)
         tx
@@ -194,7 +200,8 @@ object Day20 {
   }
 
   val allTransformations: List[List[Transformation]] = {
-    Rotation.all.flatMap(rot => Flip.all.map(flip => List(rot, flip))) ++ Flip.all.flatMap(flip => Rotation.all.map(rot => List(flip, rot)))
+    Rotation.all.flatMap(rot => Flip.all.map(flip => List(rot, flip))) ++ Flip.all.flatMap(flip => Rotation.all.map(rot => List(flip, rot))) ++ Rotation.all
+      .map(List(_)) ++ Flip.all.map(List(_)) ++ List(List(NoOp))
   }
 
   val distinctTransformations: List[List[Transformation]] = {
@@ -205,16 +212,8 @@ object Day20 {
       List(Clockwise90),
       List(Clockwise180),
       List(Clockwise270),
-      List(Clockwise90, FlipHorizontal),
       List(Clockwise90, FlipVertical),
-      List(Clockwise180, FlipHorizontal),
-      List(Clockwise180, FlipVertical),
-      List(Clockwise270, FlipHorizontal),
-      List(Clockwise270, FlipVertical),
-      List(FlipHorizontal, Clockwise90),
-      List(FlipHorizontal, Clockwise180),
-      List(FlipVertical, Clockwise180),
-      List(FlipVertical, Clockwise270)
+      List(FlipVertical, Clockwise90)
     )
   }
 
