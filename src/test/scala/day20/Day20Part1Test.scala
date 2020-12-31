@@ -168,7 +168,7 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
       val filenameOriginal = s"$id.png"
       ImageIO.write(original, "png", tempFolder.resolve(filenameOriginal).toFile)
       transformations.foreach { case (transformationList, image) =>
-        val filenameTransformed = s"$id - ${transformationList.mkString}.png"
+        val filenameTransformed = s"${id}_${transformationList.mkString}.png"
         ImageIO.write(image, "png", tempFolder.resolve(filenameTransformed).toFile)
       }
     }
@@ -184,14 +184,14 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
 
     coords.foreach { case (x, y, colorValue) => startImage.setRGB(x, y, new Color(colorValue, 0, 0).getRGB) }
     val tempFolder = Files.createTempDirectory("AOC2020_day20_")
-    ImageIO.write(startImage, "png", tempFolder.resolve(s"start_image - hash - ${getImageHash(startImage, coords)}.png").toFile)
+    ImageIO.write(startImage, "png", tempFolder.resolve(s"start_image_hash_${getImageHash(startImage, coords)}.png").toFile)
 
     val transformedImages = allTransformations
       .map(transformationList => (transformationList, applyTransformations(startImage, transformationList)))
       .map { case (transformationList, img) => (transformationList, img, getImageHash(img, coords)) }
 
     transformedImages.foreach { case (transformations, img, hash) =>
-      ImageIO.write(img, "png", tempFolder.resolve(s"image - hash - $hash - ${transformations.mkString}.png").toFile)
+      ImageIO.write(img, "png", tempFolder.resolve(s"image_hash_${hash}_${transformations.mkString}.png").toFile)
 
     }
     val grouped = transformedImages.groupBy(_._3)
@@ -224,21 +224,3 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
   }
 
 }
-
-/*
-found matching edge for t1: 1171 and t2: 1489. Id2 transformation = Clockwise180
-found matching edge for t1: 1171 and t2: 2473. Id2 transformation = Clockwise270
-found matching edge for t1: 1427 and t2: 1489. Id2 transformation = NoOp
-found matching edge for t1: 1427 and t2: 2311. Id2 transformation = NoOp
-found matching edge for t1: 1427 and t2: 2473. Id2 transformation = Clockwise90
-found matching edge for t1: 1427 and t2: 2729. Id2 transformation = NoOp
-found matching edge for t1: 1489 and t2: 2971. Id2 transformation = NoOp
-found matching edge for t1: 1951 and t2: 2311. Id2 transformation = NoOp
-found matching edge for t1: 1951 and t2: 2729. Id2 transformation = NoOp
-found matching edge for t1: 2311 and t2: 3079. Id2 transformation = FlipVerticalClockwise180
-found matching edge for t1: 2311 and t2: 3079. Id2 transformation = Clockwise180FlipVertical
-found matching edge for t1: 2311 and t2: 3079. Id2 transformation = FlipHorizontal
-found matching edge for t1: 2473 and t2: 3079. Id2 transformation = Clockwise270FlipVertical
-found matching edge for t1: 2473 and t2: 3079. Id2 transformation = Clockwise90FlipHorizontal
-found matching edge for t1: 2729 and t2: 2971. Id2 transformation = NoOp
- */
