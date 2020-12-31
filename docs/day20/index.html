@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>day 20</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="day-20">day 20</h1>
+<h2 id="transformations">transformations</h2>
+<p>I didn't want to calculate the image transformations myself, so I used java's <code>java.awt.geom.AffineTransform</code>.
+I created a 4x4 testimage with 16 different shades of red to calculate a hash of the overall image to check, which transformation yield the same result.</p>
+<p>all 18 possible transformations</p>
+<ul>
+<li>Clockwise180</li>
+<li>Clockwise180,FlipHorizontal</li>
+<li>Clockwise180,FlipVertical</li>
+<li>Clockwise270</li>
+<li>Clockwise270,FlipHorizontal</li>
+<li>Clockwise270,FlipVertical</li>
+<li>Clockwise90</li>
+<li>Clockwise90,FlipHorizontal</li>
+<li>Clockwise90,FlipVertical</li>
+<li>FlipHorizontal</li>
+<li>FlipHorizontal,Clockwise180</li>
+<li>FlipHorizontal,Clockwise270</li>
+<li>FlipHorizontal,Clockwise90</li>
+<li>FlipVertical</li>
+<li>FlipVertical,Clockwise180</li>
+<li>FlipVertical,Clockwise270</li>
+<li>FlipVertical,Clockwise90</li>
+<li>NoOp</li>
+</ul>
+<h3 id="examples-of-different-transformations-yielding-the-same-image">examples of different transformations yielding the same image</h3>
+<table>
+<thead>
+<tr>
+<th>image</th>
+<th>transformations</th>
+<th>hash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_0153045607590105120135150165180195210225_NoOp.png" width="50" style="image-rendering: pixelated" /></td>
+<td>NoOp</td>
+<td>0153045607590105120135150165180195210225</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_0601201801575135195309015021045105165225_Clockwise270FlipVertical.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise270, FlipVertical</td>
+<td>0601201801575135195309015021045105165225</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_0601201801575135195309015021045105165225_FlipVerticalClockwise90.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipVertical, Clockwise90</td>
+<td>0601201801575135195309015021045105165225</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_1801952102251201351501656075901050153045_Clockwise180FlipVertical.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise180, FlipVertical</td>
+<td>1801952102251201351501656075901050153045</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_1801952102251201351501656075901050153045_FlipHorizontal.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipHorizontal</td>
+<td>1801952102251201351501656075901050153045</td>
+</tr>
+</tbody>
+</table>
+<h3 id="there-are-only-8-distinct-transformations">There are only 8 distinct transformations</h3>
+<table>
+<thead>
+<tr>
+<th>image</th>
+<th>transformations</th>
+<th>hash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_0153045607590105120135150165180195210225_NoOp.png" width="50" style="image-rendering: pixelated" /></td>
+<td>NoOp</td>
+<td>0153045607590105120135150165180195210225</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_4510516522530901502101575135195060120180_Clockwise90.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise90</td>
+<td>4510516522530901502101575135195060120180</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_2252101951801651501351201059075604530150_Clockwise180.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise180</td>
+<td>2252101951801651501351201059075604530150</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_1801206001951357515210150903022516510545_Clockwise270.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise270</td>
+<td>1801206001951357515210150903022516510545</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_2251651054521015090301951357515180120600_Clockwise90FlipVertical.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise90, FlipVertical</td>
+<td>2251651054521015090301951357515180120600</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_1801952102251201351501656075901050153045_FlipHorizontal.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipHorizontal</td>
+<td>1801952102251201351501656075901050153045</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_4530150105907560165150135120225210195180_FlipVertical.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipVertical</td>
+<td>4530150105907560165150135120225210195180</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/image-transformations/image_hash_0601201801575135195309015021045105165225_FlipVerticalClockwise90.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipVertical, Clockwise90</td>
+<td>0601201801575135195309015021045105165225</td>
+</tr>
+</tbody>
+</table>
+<h2 id="image-transformations">image transformations</h2>
+<p>take this tile from the example input</p>
+<pre><code class="language-text"><div>Tile 1951:
+#.##...##.
+#.####...#
+.....#..##
+#...######
+.##.#....#
+.###.#####
+###.##.##.
+.###....#.
+..#.#..#.#
+#...##.#..
+</div></code></pre>
+<h3 id="tiles-as-images">tiles as images</h3>
+<table>
+<thead>
+<tr>
+<th>image</th>
+<th>transformations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_NoOp.png" width="50" style="image-rendering: pixelated" /></td>
+<td>NoOp</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_Clockwise180.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise180</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_Clockwise270.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise270</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_Clockwise90.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise90</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_Clockwise90FlipVertical.png" width="50" style="image-rendering: pixelated" /></td>
+<td>Clockwise90, FlipVertical</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_FlipHorizontal.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipHorizontal</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_FlipVertical.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipVertical</td>
+</tr>
+<tr>
+<td><img src="file:////Users/florian_witteler/programming/scala/advent-of-code/advent-of-code-2020/docs/day20/tile-transformations/1951_FlipVerticalClockwise90.png" width="50" style="image-rendering: pixelated" /></td>
+<td>FlipVertical, Clockwise90</td>
+</tr>
+</tbody>
+</table>
+
+    </body>
+    </html>
