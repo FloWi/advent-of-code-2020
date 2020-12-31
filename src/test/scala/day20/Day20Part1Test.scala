@@ -28,8 +28,30 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
     //writeTransformedTilesToDisk(transformedTileMap)
   }
 
+  test("find corners of outer edges") {
+    val neighbors = findNeighbors(transformedTileMap)
+    val graph = createGraph(neighbors)
+    val edgesUnsorted = outerEdgesUnsorted(neighbors, graph)
+
+    val paths = edgesUnsorted
+      .sortBy(_._3 * -1)
+
+    paths.map { case (from, to, _, _) => (from, to) } should contain theSameElementsAs List(
+      (1951, 3079),
+      (1951, 2971),
+      (1171, 2971),
+      (1171, 3079)
+    )
+
+    paths.foreach(println)
+  }
+
   test("orient edges") {
-    val edges = orientEdges(outerEdgesUnsorted(transformedTileMap))
+    val neighbors = findNeighbors(transformedTileMap)
+    val graph = createGraph(neighbors)
+    val edgesUnsorted = outerEdgesUnsorted(neighbors, graph)
+
+    val edges = orientEdges(edgesUnsorted)
 
     edges shouldBe Edges(
       topEdgeLeftToRight = List(1171, 1489, 2971),
@@ -41,7 +63,11 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
   }
 
   test("assemble outer edges") {
-    val edges = orientEdges(outerEdgesUnsorted(transformedTileMap))
+    val neighbors = findNeighbors(transformedTileMap)
+    val graph = createGraph(neighbors)
+    val edgesUnsorted = outerEdgesUnsorted(neighbors, graph)
+
+    val edges = orientEdges(edgesUnsorted)
     val outerEdges = assembleVectorWithOuterEdges(edges)
 
     val expected = Vector(
@@ -53,19 +79,16 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
     outerEdges shouldBe expected
   }
 
-  test("find corners of outer edges") {
+  test("assemble complete picture") {
+    val allTiles = assemblePicture(transformedTileMap)
 
-    val paths = outerEdgesUnsorted(transformedTileMap)
-      .sortBy(_._3 * -1)
-
-    paths.map { case (from, to, _, _) => (from, to) } should contain theSameElementsAs List(
-      (1951, 3079),
-      (1951, 2971),
-      (1171, 2971),
-      (1171, 3079)
+    val expected = Vector(
+      Vector(1171, 1489, 2971),
+      Vector(2473, 1427, 2729),
+      Vector(3079, 2311, 1951)
     )
 
-    paths.foreach(println)
+    allTiles shouldBe expected
   }
 
   def writeTransformedTilesToDisk(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): Unit = {
