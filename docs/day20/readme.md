@@ -517,3 +517,43 @@ We have to find this pattern in the final image, but (of course) we don't know h
 ```
 
 <img src="./sea_monster.png" width="220" style="image-rendering: pixelated" />
+
+We transform the image in all 8 ways and search for the pattern in each image.
+
+| transformations         | image                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| NoOp                    | <img src="./final-images/final_without_borders_NoOp.png" height="120" style="image-rendering: pixelated" />                    |
+| Clockwise90             | <img src="./final-images/final_without_borders_Clockwise90.png" height="120" style="image-rendering: pixelated" />             |
+| Clockwise180            | <img src="./final-images/final_without_borders_Clockwise180.png" height="120" style="image-rendering: pixelated" />            |
+| Clockwise270            | <img src="./final-images/final_without_borders_Clockwise270.png" height="120" style="image-rendering: pixelated" />            |
+| FlipHorizontal          | <img src="./final-images/final_without_borders_FlipHorizontal.png" height="120" style="image-rendering: pixelated" />          |
+| FlipVertical            | <img src="./final-images/final_without_borders_FlipVertical.png" height="120" style="image-rendering: pixelated" />            |
+| FlipVerticalClockwise90 | <img src="./final-images/final_without_borders_FlipVerticalClockwise90.png" height="120" style="image-rendering: pixelated" /> |
+| Clockwise90FlipVertical | <img src="./final-images/final_without_borders_Clockwise90FlipVertical.png" height="120" style="image-rendering: pixelated" /> |
+
+## The final image
+
+<img src="./solved/final_image_FlipVerticalClockwise90.png" height="120" style="image-rendering: pixelated" />
+
+We need to count the number of water-pixels that are not occupied by a sea monster.
+I don't know if the sea monsters would overlap, so I selected all sea-monster pixels and diffed it with all water-pixels.
+
+<img src="./solved/final_image_colored.png" height="360" style="image-rendering: pixelated" />
+
+| sea-monster sightings | sea-monster pixels | water pixels | diff             |
+| --------------------- | ------------------ | ------------ | ---------------- |
+| 2                     | 30                 | 303          | 273 (our answer) |
+
+## Solution for part 2
+
+The solution for the random seed of my user looked like this
+
+<img src="./real-input/solved/final_image_colored.png" height="520" style="image-rendering: pixelated" />
+
+| sea-monster sightings | sea-monster pixels | water pixels | diff              |
+| --------------------- | ------------------ | ------------ | ----------------- |
+| 19                    | 285                | 1914         | 1629 (our answer) |
+
+Turned out there were no overlapping sea monsters ;-)
+
+Great fun, but quite complex to solve. I could have done it a lot simpler, but I enjoyed the programming with graphics.

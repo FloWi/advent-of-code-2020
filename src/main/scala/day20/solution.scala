@@ -1,18 +1,6 @@
 package day20
 
-import day20.Day20.{
-  FinalImages,
-  applyTransformations,
-  assemblePicture,
-  assembleTiles,
-  distinctTransformations,
-  findCornerPieces,
-  findImageWithSeaMonster,
-  findSeaMonsters,
-  getTileTransformations,
-  parseImage,
-  parseTiles
-}
+import day20.Day20._
 import day20.Dijkstra.{Graph, shortestPath}
 import helper.Helper
 import helper.Helper._
@@ -88,7 +76,9 @@ object Day20 {
   case class Part2Result(
       transformations: List[Day20.Transformation],
       image: BufferedImage,
+      seaMonsterSightings: List[SeaMonsterSighting],
       seaMonsterPixels: Set[(Int, Int)],
+      waterPixels: Int,
       numberOfWaterPixelsNotOccupiedBySeaMonster: Int
   )
 
@@ -638,7 +628,7 @@ object Day20 {
 
     val waterPixelsNotOccupiedBySeaMonster = waterPixels.diff(seaMonsterPixels)
 
-    Part2Result(validResult._1, validResult._2, seaMonsterPixels, waterPixelsNotOccupiedBySeaMonster.size)
+    Part2Result(validResult._1, validResult._2, validResult._3, seaMonsterPixels, waterPixels.size, waterPixelsNotOccupiedBySeaMonster.size)
 
   }
 
