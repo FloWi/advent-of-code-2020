@@ -12,6 +12,7 @@ import javax.imageio.ImageIO
 
 class Day20Part1Test extends AnyFunSuite with Matchers {
   private val input = Helper.source(Some("src/main/resources/day20-example.txt")).mkString
+  private val inputSeaMonster = Helper.source(Some("src/main/resources/day20-sea-monster.txt")).mkString
   private val tileMap = parseTiles(input)
   private val transformedTileMap = getTileTransformations(tileMap)
 
@@ -76,87 +77,60 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
     outerEdges shouldBe expected
   }
 
-  test("assemble complete picture") {
-    val allTiles = assemblePicture(transformedTileMap)
+  test("assemble tiles") {
+    val allTiles = assembleTiles(transformedTileMap)
+      .map(_.map(_._1))
 
     val expected = Vector(
-      Vector(1171, 1489, 2971),
-      Vector(2473, 1427, 2729),
-      Vector(3079, 2311, 1951)
+      Vector(1951, 2311, 3079),
+      Vector(2729, 1427, 2473),
+      Vector(2971, 1489, 1171)
     )
 
     allTiles shouldBe expected
   }
 
-  test("transform tiles to match") {
+  test("assemble complete pictures") {
+    val allTiles = assembleTiles(transformedTileMap)
 
+    val pictures = assemblePicture(allTiles)
+    pictures.withBorders.getWidth shouldBe pictures.withoutBorders.getWidth + 6
+
+    val transformedImages = distinctTransformations.map { transformations =>
+      val withBorders = applyTransformations(pictures.withBorders, transformations)
+      val withRedBorders = applyTransformations(pictures.imgWithRedRedSeparatorBorders, transformations)
+      val withoutBorders = applyTransformations(pictures.withoutBorders, transformations)
+      (transformations, FinalImages(withBorders, withRedBorders, withoutBorders))
+    }
+
+    val tempFolder = Files.createTempDirectory("AOC2020_day20_")
+    transformedImages.foreach { case (transformations, FinalImages(withBorders, withRedBorders, withoutBorders)) =>
+      ImageIO.write(withBorders, "png", tempFolder.resolve(s"final_with_borders_${transformations.mkString}.png").toFile)
+      ImageIO.write(withRedBorders, "png", tempFolder.resolve(s"final_with_red_borders_${transformations.mkString}.png").toFile)
+      ImageIO.write(withoutBorders, "png", tempFolder.resolve(s"final_without_borders_${transformations.mkString}.png").toFile)
+    }
+    println(s"wrote files to $tempFolder")
+
+  }
+
+  test("sea monster") {
+    val seaMonster = parseImage(inputSeaMonster.split("\n").toList)
+    val tempFolder = Files.createTempDirectory("AOC2020_day20_")
+    ImageIO.write(seaMonster, "png", tempFolder.resolve(s"sea_monster.png").toFile)
+  }
+
+  test("print edge map") {
     val edges = calcEdges(transformedTileMap)
 
-    val edgeMatches: Map[Int, List[Int]] = edges.toList
-      .flatMap { case (id, (_, edgeMap)) =>
-        val edgeHashes = edgeMap.values.flatMap(_._2)
-        edgeHashes.map(hash => (hash, id))
+    println("tile_id;top;right;left;bottom;transformations")
+    edges.foreach { case (id, (_, edgeMap)) =>
+      edgeMap.foreach { case (transformations, (_, edge)) =>
+        println(s"$id;${edge.top};${edge.right};${edge.bottom};${edge.left};${transformations.mkString(", ")}")
       }
-      .groupBy(_._1)
-      .mapValues(_.map(_._2).distinct)
-      .toMap
-
-    val leftTop = edges(1951)
-    val middleTop = edges(2311)
-    val leftMiddle = edges(2729)
-
-    def printEdges(img: BufferedImage, additional: Option[String] = None): Unit = {
-
-      val t = top(img)
-      val b = bottom(img)
-      val l = left(img)
-      val r = right(img)
-
-      println(s"top: $t; right: $r; bottom: $b; left: $l${additional.getOrElse("")}")
     }
+  }
 
-    printEdges(leftTop._1, Some("; top-left original"))
-
-    val leftTopTransformations = leftTop._2.toList.map { case (transformations, (img, edgeHashes)) => (transformations, img, edgeHashes.toSet) }
-    val middleTopTransformations = middleTop._2.toList.map { case (transformations, (img, edgeHashes)) => (transformations, img, edgeHashes.toSet) }
-    val leftMiddleTransformations = leftMiddle._2.toList.map { case (transformations, (img, edgeHashes)) => (transformations, img, edgeHashes.toSet) }
-
-    //find two edges, that only the top-left tile has (the top one and the left one)
-    val outerEdgesOfTopLeftTile = edgeMatches.filter(_._2 == List(1951)).keys.toSet
-    println(s"edges of top left tile without matching other tile - these have to be on the outer side: ${outerEdgesOfTopLeftTile.toList.sorted.mkString(", ")}")
-
-    //find the transformations, after which those edges are top and left
-    val validTransformationsLeftTop = leftTopTransformations.filter { case (_, img, _) =>
-      val isTop = outerEdgesOfTopLeftTile.contains(top(img))
-      val isLeft = outerEdgesOfTopLeftTile.contains(left(img))
-      isTop && isLeft
-    }
-    validTransformationsLeftTop.foreach(tup => printEdges(tup._2, Some(s"; valid transformations: ${tup._1}")))
-
-    //find right edges of topLeft tile after transformations
-    val rightEdgesOfTopLeftAfterTransformations = validTransformationsLeftTop.map(_._2).map(right).toSet
-    // 318, 710
-
-    //find bottom edges of topLeft tile after transformations
-    val bottomEdgesOfTopLeftAfterTransformations = validTransformationsLeftTop.map(_._2).map(bottom).toSet
-    // also 318, 710
-
-    println()
-    printEdges(middleTop._1, Some("; middleTop original"))
-
-    val validTransformationsOfMiddleTop = middleTopTransformations.filter(t => rightEdgesOfTopLeftAfterTransformations.contains(left(t._2)))
-    println(s"found ${validTransformationsOfMiddleTop.size} transformations, where the left side of middleTop matches the right side of leftTop")
-    validTransformationsOfMiddleTop.foreach { case (transformations, img, _) =>
-      printEdges(img, Some(s"; transformations: $transformations"))
-    }
-    println()
-    printEdges(leftMiddle._1, Some("; leftMiddle original"))
-
-    val validTransformationsOfLeftMiddle = leftMiddleTransformations.filter(t => bottomEdgesOfTopLeftAfterTransformations.contains(top(t._2)))
-    println(s"found ${validTransformationsOfLeftMiddle.size} transformations, where the top side of leftMiddle matches the bottom side of leftTop")
-    validTransformationsOfLeftMiddle.foreach { case (transformations, img, _) =>
-      printEdges(img, Some(s"; transformations: $transformations"))
-    }
+  test("transform tiles to match") {
 
     ???
 
@@ -213,6 +187,200 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
       .sorted
       .foreach(println)
 
+  }
+
+  test("documentation output for edge matching") {
+    val edges = calcEdges(transformedTileMap)
+
+    val edgeList: List[(Int, Edge, List[Transformation])] = edges.flatMap { case (id, (_, edgeMap)) =>
+      edgeMap.map { case (transformations, (_, edges)) =>
+        (id, edges, transformations)
+      }
+    }.toList
+
+    val horizontalMatching = edgeList
+      .map { case (id1, edges1, transformations1) =>
+        val matching = edgeList.filter { case (id2, edges2, _) =>
+          id1 != id2 && edges1.right == edges2.left
+        }
+        (id1, edges1, transformations1, matching)
+      }
+      .filterNot(_._4.isEmpty)
+      .flatMap { case (id1, edge1, trans1, matches) =>
+        matches.map { case (id2, _, trans2) =>
+          (id1, trans1, id2, trans2, "horizontal", edge1.right)
+        }
+      }
+
+    val verticalMatching = edgeList
+      .map { case (id1, edges1, transformations1) =>
+        val matching = edgeList.filter { case (id2, edges2, _) =>
+          id1 != id2 && edges1.bottom == edges2.top
+        }
+        (id1, edges1, transformations1, matching)
+      }
+      .filterNot(_._4.isEmpty)
+      .flatMap { case (id1, edge1, trans1, matches) =>
+        matches.map { case (id2, _, trans2) =>
+          (id1, trans1, id2, trans2, "vertical", edge1.top)
+        }
+      }
+
+    val allMatches = horizontalMatching ++ verticalMatching
+
+    println("\n\nmatching edges")
+    println("tile1 id;transformation tile1;tile2 id;transformation tile2;match direction;hash of matching edge")
+    allMatches
+      .sortBy(t => (t._1, t._3))
+      .foreach { case (id1, trans1, id2, trans2, direction, edgeHash) =>
+        println(s"$id1;${trans1.mkString(", ")};$id2;${trans2.mkString(", ")};$direction;$edgeHash")
+      }
+
+    val numberOfMatchesWithOtherTiles = allMatches
+      .map(t => (t._1, t._3))
+      .distinct
+      .groupBy(_._1)
+      .view
+      .mapValues { list => (list.size, list.map(_._2)) }
+      .toList
+      .sortBy(_._1)
+
+    val neighbors = findNeighbors(transformedTileMap)
+
+    val neighborDiGraph = neighbors
+      .flatMap { list =>
+        List(list, list.reverse)
+      }
+
+    val tilesWithNeighbors = neighborDiGraph
+      .groupBy(_.head)
+      .map { case (id, group) => (id, group.size, group.map(_.last)) }
+      .toList
+
+    println("\n\nnumber of matching tiles")
+    println("tile id;number of matches;matching tiles")
+    tilesWithNeighbors
+      .sortBy { case (id, size, _) => (size, id) }
+      .foreach { case (id, num, matchingTiles) =>
+        println(s"$id;$num;${matchingTiles.sorted.mkString(",")}")
+      }
+
+    println("\n\nedge hashes of tiles")
+    println("id;transformation;top;left;bottom;right")
+
+    edgeList
+      .filter(t => Set(1951, 2311, 2729, 2971, 3079).contains(t._1))
+      .sortBy { case (id, e, _) => (id, e.top, e.left) }
+      .foreach { case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+      }
+
+    println("\n\nall edge hashes of 1951")
+    edges(1951)._2.flatMap(_._2._2.edges).toList.distinct.sorted.foreach(println)
+
+    println("\n\nall edge hashes that only exist once")
+
+    val edgeUsage = edgeList
+      .flatMap { case (id, edge, _) =>
+        edge.edges.map(hash => (hash, id))
+      }
+      .distinct
+      .groupBy(_._1)
+      .view
+      .map { case (hash, matches) => (hash, matches.size, matches.map(_._2)) }
+      .toList
+    println("tile ids;number of tiles with that edge;edge hash")
+    edgeUsage
+      .sortBy { case (edgeHash, cnt, matchingTiles) =>
+        (matchingTiles.headOption, cnt, edgeHash)
+      }
+      .foreach { case (edgeHash, cnt, matchingTiles) =>
+        println(s"${matchingTiles.sorted.mkString(", ")};$cnt;$edgeHash")
+      }
+
+    println("\n\ntile with two neighbors")
+    println("id;transformation;top;left;bottom;right")
+
+    edgeList
+      .filter { case (_, e, _) =>
+        //t.top == 210 && t.left == 9 ||
+        //t.top == 9   && t.left == 210
+        e.top == 210 && e.left == 9 || e.top == 9 && e.left == 210
+      }
+      .sortBy { case (id, e, _) => (id, e.top, e.left) }
+      .foreach { case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+      }
+
+    println("\n\ntop right with left neighbor-constraint")
+    println("id;transformation;top;left;bottom;right")
+
+    val otherNeighbors = Set(1171, 2971, 3079)
+    edgeList
+      .filter { t =>
+        otherNeighbors.contains(t._1) && Set(85, 616).contains(t._2.left)
+      }
+      .sortBy { case (id, e, _) => (id, e.top, e.left) }
+      .foreach { case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+      }
+
+    println("\n\nbottom left with top neighbor-constraint")
+    println("id;transformation;top;left;bottom;right")
+
+    edgeList
+      .filter { t =>
+        otherNeighbors.contains(t._1) && Set(85, 616).contains(t._2.top)
+      }
+      .sortBy { case (id, e, _) => (id, e.top, e.left) }
+      .foreach { case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+      }
+
+    val tile_2_0 = edgeList.find { case (id, _, transformations) => id == 3079 && transformations == List(NoOp) }.get
+    val tile_1_1 = edgeList.find { case (id, _, transformations) => id == 1427 && transformations == List(FlipVertical) }.get
+    val tile_0_2 = edgeList.find { case (id, _, transformations) => id == 2971 && transformations == List(FlipVertical) }.get
+
+    println("\n\n(1,2) with constraints")
+    println("id;transformation;top;left;bottom;right")
+
+    val tile_1_2 =
+      edgeList.find { t =>
+        t._2.top == tile_1_1._2.bottom && t._2.left == tile_0_2._2.right
+      }.get
+
+    tile_1_2 match {
+      case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+    }
+
+    println("\n\n(2,1) with constraints")
+    println("id;transformation;top;left;bottom;right")
+
+    val tile_2_1 =
+      edgeList.find { t =>
+        t._2.left == tile_1_1._2.right && t._2.top == tile_2_0._2.bottom
+      }.get
+
+    tile_2_1 match {
+      case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+    }
+
+    println("\n\n(2,2) with constraints")
+    println("id;transformation;top;left;bottom;right")
+
+    val tile_2_2 =
+      edgeList.find { t =>
+        t._2.left == tile_1_2._2.right && t._2.top == tile_2_1._2.bottom
+      }.get
+
+    tile_2_2 match {
+      case (id, edge, transformations) =>
+        println(s"$id;${transformations.mkString(", ")};${edge.top};${edge.left};${edge.bottom};${edge.right}")
+    }
+
+    println()
   }
 
   def getImageHash(bufferedImage: BufferedImage, coords: List[(Int, Int, Int)]) = {

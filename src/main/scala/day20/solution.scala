@@ -51,7 +51,7 @@ object Day20 {
   def parseTiles(input: String): Map[Int, BufferedImage] = {
     val tiles = input.split("\n\n").map(_.split("\n").toList).toList
 
-    val tileMap = tiles.map(parseImage).toMap
+    val tileMap = tiles.map(parseTile).toMap
 
     tileMap
   }
@@ -65,8 +65,12 @@ object Day20 {
     }
   }
 
-  def getEdges(img: BufferedImage): List[Int] = {
-    List(
+  case class Edge(top: Int, bottom: Int, left: Int, right: Int) {
+    def edges: List[Int] = List(top, right, left, bottom)
+  }
+
+  def getEdges(img: BufferedImage): Edge = {
+    Edge(
       top(img),
       bottom(img),
       left(img),
@@ -76,7 +80,7 @@ object Day20 {
 
   def calcEdges(
       transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]
-  ): Map[Int, (BufferedImage, Map[List[Transformation], (BufferedImage, List[Int])])] = {
+  ): Map[Int, (BufferedImage, Map[List[Transformation], (BufferedImage, Edge)])] = {
     transformedTileMap.view.mapValues { case (original, transformationMap) =>
       val edgeMap = transformationMap.view.mapValues(img => (img, getEdges(img)))
       original -> edgeMap.toMap
@@ -90,7 +94,7 @@ object Day20 {
 
     val edgeMatches: Map[Int, List[Int]] = edges.toList
       .flatMap { case (id, (_, edgeMap)) =>
-        val edgeHashes = edgeMap.values.flatMap(_._2)
+        val edgeHashes = edgeMap.values.flatMap(_._2.edges)
         edgeHashes.map(hash => (hash, id))
       }
       .groupBy(_._1)
@@ -173,24 +177,30 @@ object Day20 {
     dest
   }
 
-  def parseImage(lines: List[String]): (Int, BufferedImage) = {
+  def parseTile(lines: List[String]): (Int, BufferedImage) = {
     //Tile 2311:
     //..##.#..#.
 
     val id = lines.head.split(" ").last.dropRight(1).toInt
 
     val imageLines = lines.tail
-    val image = new BufferedImage(imageLines.length, imageLines.length, BufferedImage.TYPE_BYTE_BINARY)
+    val image = parseImage(imageLines)
+    (id, image)
+  }
+
+  def parseImage(imageLines: List[String]): BufferedImage = {
+    val image = new BufferedImage(imageLines.head.length, imageLines.length, BufferedImage.TYPE_BYTE_BINARY)
 
     imageLines.zipWithIndex
       .foreach { case (line, y) =>
         line.zipWithIndex.foreach { case (char, x) =>
-          val color = if (char == '.') Color.BLACK else Color.WHITE
+          val color = if (char == '#') Color.WHITE else Color.BLACK
           image.setRGB(x, y, color.getRGB)
         }
       }
 
-    (id, image)
+    image
+
   }
 
   def cloneImage(image: BufferedImage): BufferedImage = {
@@ -315,33 +325,174 @@ object Day20 {
     Edges(assumedTopEdge, leftEdgeTopToBottom, rightEdgeTopToBottom, bottomEdgeLeftToRight)
   }
 
-  def assemblePicture(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): Vector[Vector[Int]] = {
+  def assembleTiles(
+      transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]
+  ): Vector[Vector[(Int, List[Transformation], BufferedImage)]] = {
+
     val neighbors = findNeighbors(transformedTileMap)
 
-    val graph = createGraph(neighbors)
+    val neighborDiGraph = neighbors
+      .flatMap { list =>
+        List(list, list.reverse)
+      }
 
-    val edges = orientEdges(outerEdgesUnsorted(neighbors, graph))
-    val pictureOfOuterEdges = assembleVectorWithOuterEdges(edges)
+    val tilesWithNeighbors = neighborDiGraph
+      .groupBy(_.head)
+      .map { case (id, group) => (id, group.size, group.map(_.last)) }
+      .toList
 
-    val rowsStartAndEnd = edges.leftEdgeTopToBottom.zip(edges.rightEdgeTopToBottom).zipWithIndex.map(_.swap)
-    val pathsFromLeftToRight = rowsStartAndEnd.flatMap { case (y, (startTile, endTile)) =>
-      val path = findPath(startTile, endTile, graph)
-      path.get.zipWithIndex.map { case (id, x) => (x, y, id) }
-    }
+    val cornerPieces = tilesWithNeighbors
+      .filter(_._2 == 2)
+      .map(_._1)
 
-    pathsFromLeftToRight
-      .foldLeft(pictureOfOuterEdges) { case (pic, (x, y, id)) =>
-        pic(y)(x) match {
-          case Some(oldId) =>
-            //this tile has already been set - just validate
-            assert(oldId == id)
-            pic
-          case None =>
-            val row = pic(y)
-            pic.updated(y, row.updated(x, Some(id)))
+    val edges = calcEdges(transformedTileMap)
+
+    val edgeList: List[(Int, Edge, List[Transformation], BufferedImage)] = edges.flatMap { case (id, (_, edgeMap)) =>
+      edgeMap.map { case (transformations, (img, edges)) =>
+        (id, edges, transformations, img)
+      }
+    }.toList
+
+    val edgeUsage = edgeList
+      .flatMap { case (id, edge, _, _) =>
+        edge.edges.map(hash => (hash, id))
+      }
+      .distinct
+      .groupBy(_._1)
+      .view
+      .map { case (hash, matches) => (hash, matches.size, matches.map(_._2)) }
+      .toList
+
+    val outerEdges = edgeUsage
+      .filter(_._2 == 1)
+      .sortBy(_._1)
+
+    val outerEdgeHashes = outerEdges.map(_._1).toSet
+
+    val outerEdgesPerTile = outerEdges
+      .map { case (hash, _, List(id)) => (id, hash) }
+      .groupBy(_._1)
+      .map { case (id, group) => id -> group.map(_._2) }
+
+    val topLeftCornerPiece = cornerPieces.head
+    val outerEdgesOfCornerPiece = outerEdgesPerTile(topLeftCornerPiece).toSet
+
+    val allTransformationsOfCornerPiece = edges(topLeftCornerPiece)._2
+    val validTransformationsOfCornerPiece = allTransformationsOfCornerPiece
+      .filter { case (_, (_, edge)) =>
+        outerEdgesOfCornerPiece.contains(edge.top) && outerEdgesOfCornerPiece.contains(edge.left)
+      }
+
+    //just pick the last one - then it matches with the example from AOC
+    val topLeftConfiguration: (List[Transformation], (BufferedImage, Edge)) = validTransformationsOfCornerPiece.last
+
+    val (topLeftTransformations, (topLeftImg, topLeftEdge)) = topLeftConfiguration
+    val n = math.sqrt(transformedTileMap.size).toInt
+
+    val coords = for {
+      y <- 0.until(n).toList
+      x <- 0.until(n)
+    } yield (x, y)
+
+    type Row = ((Int, Edge, List[Transformation], BufferedImage))
+
+    val assembledTiles = coords
+      .foldLeft(Map((0, 0) -> (topLeftCornerPiece, topLeftTransformations, topLeftEdge, topLeftImg))) { case (acc, (x, y)) =>
+        if (acc.contains((x, y))) acc
+        else {
+          val useTopTileFilter = y > 0
+          val useLeftTileFilter = x > 0
+
+          val topTileFilter: Row => Boolean = { row =>
+            val bottomEdgeOfTopTile = acc((x, y - 1))._3.bottom
+            row._2.top == bottomEdgeOfTopTile
+          }
+
+          val leftTileFilter: ((Int, Edge, List[Transformation], BufferedImage)) => Boolean = { row =>
+            val rightEdgeOfLeftTile = acc((x - 1, y))._3.right
+            row._2.left == rightEdgeOfLeftTile
+          }
+
+          val leftOuterFilter: Row => Boolean = { row =>
+            outerEdgeHashes.contains(row._2.left)
+          }
+
+          val topOuterFilter: Row => Boolean = { row =>
+            outerEdgeHashes.contains(row._2.top)
+          }
+
+          val filterFn: ((Int, Edge, List[Transformation], BufferedImage)) => Boolean = { row =>
+            (useTopTileFilter, useLeftTileFilter) match {
+              case (true, true)   => topTileFilter(row) && leftTileFilter(row)
+              case (true, false)  => topTileFilter(row) && leftOuterFilter(row)
+              case (false, true)  => leftTileFilter(row) && topOuterFilter(row)
+              case (false, false) => topOuterFilter(row) && leftOuterFilter(row)
+            }
+          }
+
+          val matchingEdges = edgeList.filter(filterFn).filterNot { case (id, _, _, _) => acc.exists(_._2._1 == id) }
+          assert(matchingEdges.size == 1)
+          val (id, edges, transformations, image) = matchingEdges.head
+          acc.updated((x, y), (id, transformations, edges, image))
         }
       }
-      .map(_.map(_.get))
+      .map { case ((x, y), (id, transformations, _, img)) => ((x, y), (id, transformations, img)) }
+
+    0.until(n)
+      .map { y =>
+        0.until(n)
+          .map { x =>
+            assembledTiles((x, y))
+          }
+          .toVector
+      }
+      .toVector
+  }
+
+  case class FinalImages(withBorders: BufferedImage, imgWithRedRedSeparatorBorders: BufferedImage, withoutBorders: BufferedImage)
+  def assemblePicture(tiles: Vector[Vector[(Int, List[Transformation], BufferedImage)]]): FinalImages = {
+    val n = tiles.size
+    val img1 = tiles.head.head._3
+
+    val imgWithBorders = new BufferedImage(img1.getWidth * n, img1.getHeight * n, img1.getType)
+    val rasterWithBorders = imgWithBorders.getRaster
+
+    val imgWithoutBorders = new BufferedImage((img1.getWidth - 2) * n, (img1.getHeight - 2) * n, img1.getType)
+    val rasterWithoutBorders = imgWithoutBorders.getRaster
+
+    val imgWithRedBorders = new BufferedImage(imgWithBorders.getWidth, imgWithBorders.getHeight, BufferedImage.TYPE_INT_RGB)
+    val rasterWithRedBorders = imgWithRedBorders.getGraphics
+
+    tiles.zipWithIndex.foreach { case (row, y) =>
+      row.zipWithIndex.foreach { case ((_, _, img), x) =>
+        val xWithBorder = img1.getWidth * x
+        val yWithBorder = img1.getHeight * y
+        rasterWithBorders.setDataElements(xWithBorder, yWithBorder, img.getRaster)
+
+        val xWithoutBorder = (img1.getWidth - 2) * x
+        val yWithoutBorder = (img1.getHeight - 2) * y
+        val tileWithoutBorder = img.getSubimage(1, 1, img.getWidth - 2, img.getHeight - 2)
+        rasterWithoutBorders.setDataElements(xWithoutBorder, yWithoutBorder, tileWithoutBorder.getRaster)
+
+        rasterWithRedBorders.drawImage(img, xWithBorder, yWithBorder, null)
+        0.until(img.getWidth).foreach { dx =>
+          0.until(img.getHeight).foreach { dy =>
+            if (dx == 0 || dx == img.getWidth - 1 || dy == 0 || dy == img.getHeight - 1) {
+              val redX = xWithBorder + dx
+              val redY = yWithBorder + dy
+              val isBlack = img.getRGB(dx, dy) == Color.BLACK.getRGB
+              if (isBlack) {
+                imgWithRedBorders.setRGB(redX, redY, Color.RED.getRGB)
+              }
+            }
+          }
+        }
+
+      }
+    }
+
+    FinalImages(imgWithBorders, imgWithRedBorders, imgWithoutBorders)
+
   }
 
   def assembleVectorWithOuterEdges(edges: Edges): Vector[Vector[Option[Int]]] = {

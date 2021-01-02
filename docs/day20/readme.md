@@ -69,13 +69,451 @@ Tile 1951:
 
 ### tiles as images
 
-| image                                                                                                               | transformations           |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| <img src="./tile-transformations/1951_NoOp.png" width="50" style="image-rendering: pixelated" />                    | NoOp                      |
-| <img src="./tile-transformations/1951_Clockwise180.png" width="50" style="image-rendering: pixelated" />            | Clockwise180              |
-| <img src="./tile-transformations/1951_Clockwise270.png" width="50" style="image-rendering: pixelated" />            | Clockwise270              |
-| <img src="./tile-transformations/1951_Clockwise90.png" width="50" style="image-rendering: pixelated" />             | Clockwise90               |
-| <img src="./tile-transformations/1951_Clockwise90FlipVertical.png" width="50" style="image-rendering: pixelated" /> | Clockwise90, FlipVertical |
-| <img src="./tile-transformations/1951_FlipHorizontal.png" width="50" style="image-rendering: pixelated" />          | FlipHorizontal            |
-| <img src="./tile-transformations/1951_FlipVertical.png" width="50" style="image-rendering: pixelated" />            | FlipVertical              |
-| <img src="./tile-transformations/1951_FlipVerticalClockwise90.png" width="50" style="image-rendering: pixelated" /> | FlipVertical, Clockwise90 |
+| image                                                                                                    | transformations | image                                                                                                               | transformations           |
+| -------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| <img src="./tile-transformations/1951_NoOp.png" width="50" style="image-rendering: pixelated" />         | NoOp            | <img src="./tile-transformations/1951_Clockwise90FlipVertical.png" width="50" style="image-rendering: pixelated" /> | Clockwise90, FlipVertical |
+| <img src="./tile-transformations/1951_Clockwise90.png" width="50" style="image-rendering: pixelated" />  | Clockwise90     | <img src="./tile-transformations/1951_FlipHorizontal.png" width="50" style="image-rendering: pixelated" />          | FlipHorizontal            |
+| <img src="./tile-transformations/1951_Clockwise180.png" width="50" style="image-rendering: pixelated" /> | Clockwise180    | <img src="./tile-transformations/1951_FlipVertical.png" width="50" style="image-rendering: pixelated" />            | FlipVertical              |
+| <img src="./tile-transformations/1951_Clockwise270.png" width="50" style="image-rendering: pixelated" /> | Clockwise270    | <img src="./tile-transformations/1951_FlipVerticalClockwise90.png" width="50" style="image-rendering: pixelated" /> | FlipVertical, Clockwise90 |
+
+## calculating edges
+
+### hashes of edges
+
+## matching tiles horizontally and vertically
+
+### match-direction: vertical
+
+```text
+id1 (top)
+id2 (bottom)
+```
+
+### match-direction: horizontal
+
+```text
+id1 (left) | id2 (right)
+```
+
+### matching tiles
+
+| tile1 id | transformation tile1      | tile2 id | transformation tile2      | match direction | hash of matching edge |
+| -------- | ------------------------- | -------- | ------------------------- | --------------- | --------------------- |
+| 1171     | NoOp                      | 1489     | Clockwise180              | horizontal      | 288                   |
+| 1171     | FlipVertical              | 1489     | FlipHorizontal            | horizontal      | 18                    |
+| 1171     | Clockwise90               | 1489     | Clockwise270              | vertical        | 391                   |
+| 1171     | FlipVertical, Clockwise90 | 1489     | Clockwise90, FlipVertical | vertical        | 902                   |
+| 1171     | Clockwise90               | 2473     | NoOp                      | horizontal      | 966                   |
+| 1171     | Clockwise90, FlipVertical | 2473     | FlipVertical              | horizontal      | 399                   |
+| 1171     | Clockwise180              | 2473     | Clockwise90               | vertical        | 96                    |
+| 1171     | FlipVertical              | 2473     | FlipVertical, Clockwise90 | vertical        | 24                    |
+| 1427     | Clockwise90               | 1489     | Clockwise90               | horizontal      | 948                   |
+| 1427     | Clockwise90, FlipVertical | 1489     | Clockwise90, FlipVertical | horizontal      | 183                   |
+| 1427     | Clockwise180              | 1489     | Clockwise180              | vertical        | 300                   |
+| 1427     | FlipVertical              | 1489     | FlipVertical              | vertical        | 210                   |
+| 1427     | FlipVertical, Clockwise90 | 2311     | FlipVertical, Clockwise90 | horizontal      | 210                   |
+| 1427     | Clockwise270              | 2311     | Clockwise270              | horizontal      | 300                   |
+| 1427     | FlipHorizontal            | 2311     | FlipHorizontal            | vertical        | 183                   |
+| 1427     | NoOp                      | 2311     | NoOp                      | vertical        | 948                   |
+| 1427     | NoOp                      | 2473     | Clockwise90               | horizontal      | 234                   |
+| 1427     | FlipVertical              | 2473     | Clockwise90, FlipVertical | horizontal      | 348                   |
+| 1427     | Clockwise90               | 2473     | Clockwise180              | vertical        | 9                     |
+| 1427     | FlipVertical, Clockwise90 | 2473     | FlipVertical              | vertical        | 576                   |
+| 1427     | FlipHorizontal            | 2729     | FlipHorizontal            | horizontal      | 576                   |
+| 1427     | Clockwise180              | 2729     | Clockwise180              | horizontal      | 9                     |
+| 1427     | Clockwise90, FlipVertical | 2729     | Clockwise90, FlipVertical | vertical        | 348                   |
+| 1427     | Clockwise270              | 2729     | Clockwise270              | vertical        | 234                   |
+| 1489     | NoOp                      | 1171     | Clockwise180              | horizontal      | 18                    |
+| 1489     | FlipVertical              | 1171     | FlipHorizontal            | horizontal      | 288                   |
+| 1489     | Clockwise90               | 1171     | Clockwise270              | vertical        | 689                   |
+| 1489     | FlipVertical, Clockwise90 | 1171     | Clockwise90, FlipVertical | vertical        | 565                   |
+| 1489     | FlipVertical, Clockwise90 | 1427     | FlipVertical, Clockwise90 | horizontal      | 948                   |
+| 1489     | Clockwise270              | 1427     | Clockwise270              | horizontal      | 183                   |
+| 1489     | FlipHorizontal            | 1427     | FlipHorizontal            | vertical        | 43                    |
+| 1489     | NoOp                      | 1427     | NoOp                      | vertical        | 848                   |
+| 1489     | FlipHorizontal            | 2971     | FlipHorizontal            | horizontal      | 565                   |
+| 1489     | Clockwise180              | 2971     | Clockwise180              | horizontal      | 689                   |
+| 1489     | Clockwise90, FlipVertical | 2971     | Clockwise90, FlipVertical | vertical        | 288                   |
+| 1489     | Clockwise270              | 2971     | Clockwise270              | vertical        | 18                    |
+| 1951     | NoOp                      | 2311     | NoOp                      | horizontal      | 498                   |
+| 1951     | FlipVertical              | 2311     | FlipVertical              | horizontal      | 318                   |
+| 1951     | Clockwise90               | 2311     | Clockwise90               | vertical        | 587                   |
+| 1951     | FlipVertical, Clockwise90 | 2311     | FlipVertical, Clockwise90 | vertical        | 841                   |
+| 1951     | Clockwise90               | 2729     | Clockwise90               | horizontal      | 710                   |
+| 1951     | Clockwise90, FlipVertical | 2729     | Clockwise90, FlipVertical | horizontal      | 397                   |
+| 1951     | Clockwise180              | 2729     | Clockwise180              | vertical        | 177                   |
+| 1951     | FlipVertical              | 2729     | FlipVertical              | vertical        | 564                   |
+| 2311     | Clockwise90               | 1427     | Clockwise90               | horizontal      | 210                   |
+| 2311     | Clockwise90, FlipVertical | 1427     | Clockwise90, FlipVertical | horizontal      | 300                   |
+| 2311     | Clockwise180              | 1427     | Clockwise180              | vertical        | 924                   |
+| 2311     | FlipVertical              | 1427     | FlipVertical              | vertical        | 231                   |
+| 2311     | FlipHorizontal            | 1951     | FlipHorizontal            | horizontal      | 498                   |
+| 2311     | Clockwise180              | 1951     | Clockwise180              | horizontal      | 318                   |
+| 2311     | Clockwise90, FlipVertical | 1951     | Clockwise90, FlipVertical | vertical        | 616                   |
+| 2311     | Clockwise270              | 1951     | Clockwise270              | vertical        | 89                    |
+| 2311     | NoOp                      | 3079     | FlipVertical              | horizontal      | 89                    |
+| 2311     | FlipVertical              | 3079     | NoOp                      | horizontal      | 616                   |
+| 2311     | Clockwise90               | 3079     | FlipVertical, Clockwise90 | vertical        | 318                   |
+| 2311     | FlipVertical, Clockwise90 | 3079     | Clockwise90               | vertical        | 498                   |
+| 2473     | FlipHorizontal            | 1171     | FlipVertical, Clockwise90 | horizontal      | 966                   |
+| 2473     | Clockwise180              | 1171     | Clockwise270              | horizontal      | 399                   |
+| 2473     | Clockwise90, FlipVertical | 1171     | FlipHorizontal            | vertical        | 184                   |
+| 2473     | Clockwise270              | 1171     | NoOp                      | vertical        | 116                   |
+| 2473     | FlipVertical, Clockwise90 | 1427     | FlipHorizontal            | horizontal      | 234                   |
+| 2473     | Clockwise270              | 1427     | Clockwise180              | horizontal      | 348                   |
+| 2473     | FlipHorizontal            | 1427     | Clockwise90, FlipVertical | vertical        | 481                   |
+| 2473     | NoOp                      | 1427     | Clockwise270              | vertical        | 542                   |
+| 2473     | NoOp                      | 3079     | Clockwise90, FlipVertical | horizontal      | 116                   |
+| 2473     | FlipVertical              | 3079     | Clockwise90               | horizontal      | 184                   |
+| 2473     | Clockwise90               | 3079     | FlipVertical              | vertical        | 399                   |
+| 2473     | FlipVertical, Clockwise90 | 3079     | Clockwise180              | vertical        | 966                   |
+| 2729     | NoOp                      | 1427     | NoOp                      | horizontal      | 576                   |
+| 2729     | FlipVertical              | 1427     | FlipVertical              | horizontal      | 9                     |
+| 2729     | Clockwise90               | 1427     | Clockwise90               | vertical        | 962                   |
+| 2729     | FlipVertical, Clockwise90 | 1427     | FlipVertical, Clockwise90 | vertical        | 271                   |
+| 2729     | FlipVertical, Clockwise90 | 1951     | FlipVertical, Clockwise90 | horizontal      | 710                   |
+| 2729     | Clockwise270              | 1951     | Clockwise270              | horizontal      | 397                   |
+| 2729     | FlipHorizontal            | 1951     | FlipHorizontal            | vertical        | 680                   |
+| 2729     | NoOp                      | 1951     | NoOp                      | vertical        | 85                    |
+| 2729     | Clockwise90               | 2971     | Clockwise90               | horizontal      | 85                    |
+| 2729     | Clockwise90, FlipVertical | 2971     | Clockwise90, FlipVertical | horizontal      | 680                   |
+| 2729     | Clockwise180              | 2971     | Clockwise180              | vertical        | 397                   |
+| 2729     | FlipVertical              | 2971     | FlipVertical              | vertical        | 710                   |
+| 2971     | NoOp                      | 1489     | NoOp                      | horizontal      | 565                   |
+| 2971     | FlipVertical              | 1489     | FlipVertical              | horizontal      | 689                   |
+| 2971     | Clockwise90               | 1489     | Clockwise90               | vertical        | 78                    |
+| 2971     | FlipVertical, Clockwise90 | 1489     | FlipVertical, Clockwise90 | vertical        | 456                   |
+| 2971     | FlipVertical, Clockwise90 | 2729     | FlipVertical, Clockwise90 | horizontal      | 85                    |
+| 2971     | Clockwise270              | 2729     | Clockwise270              | horizontal      | 680                   |
+| 2971     | FlipHorizontal            | 2729     | FlipHorizontal            | vertical        | 532                   |
+| 2971     | NoOp                      | 2729     | NoOp                      | vertical        | 161                   |
+| 3079     | FlipHorizontal            | 2311     | Clockwise180              | horizontal      | 616                   |
+| 3079     | Clockwise180              | 2311     | FlipHorizontal            | horizontal      | 89                    |
+| 3079     | Clockwise90, FlipVertical | 2311     | Clockwise270              | vertical        | 66                    |
+| 3079     | Clockwise270              | 2311     | Clockwise90, FlipVertical | vertical        | 264                   |
+| 3079     | FlipVertical, Clockwise90 | 2473     | Clockwise180              | horizontal      | 184                   |
+| 3079     | Clockwise270              | 2473     | FlipHorizontal            | horizontal      | 116                   |
+| 3079     | FlipHorizontal            | 2473     | Clockwise270              | vertical        | 501                   |
+| 3079     | NoOp                      | 2473     | Clockwise90, FlipVertical | vertical        | 702                   |
+
+## finding the corner pieces
+
+If you count the number of matching tiles for each tile, you can determine their place in the picture.
+
+The tiles with only two matching tiles must be the edges of the picture. Thankfully, Erik designed the puzzle in a way that this property holds.
+
+| tile id | number of matches | matching tiles      |
+| ------- | ----------------- | ------------------- |
+| 1171    | 2                 | 1489,2473           |
+| 1427    | 4                 | 1489,2311,2473,2729 |
+| 1489    | 3                 | 1171,1427,2971      |
+| 1951    | 2                 | 2311,2729           |
+| 2311    | 3                 | 1427,1951,3079      |
+| 2473    | 3                 | 1171,1427,3079      |
+| 2729    | 3                 | 1427,1951,2971      |
+| 2971    | 2                 | 1489,2729           |
+| 3079    | 2                 | 2311,2473           |
+
+So, our corners are these tiles.
+
+| tile id | matching tiles |
+| ------- | -------------- |
+| 1171    | 1489,2473      |
+| 1951    | 2311,2729      |
+| 2971    | 1489,2729      |
+| 3079    | 2311,2473      |
+
+## assembling the picture
+
+Assembling the picture turns out to be quite complex. First, we have to pick one of the four corner pieces and assume, this is our top-left tile.
+
+Let's pick the aforementioned corner-tile 1951 as our top-left cornerpiece.
+
+We now have to figure out how to transform it in a way, such that the matching edges are on the inside - or, we flip it around and look for the edges that face outwards.
+
+### finding the outer edges
+
+| tile ids   | number of tiles with that edge | edge hash |
+| ---------- | ------------------------------ | --------- |
+| ...        | ...                            | ...       |
+| 1427, 1489 | 2                              | 948       |
+| **1951**   | **1**                          | **177**   |
+| **1951**   | **1**                          | **564**   |
+| **1951**   | **1**                          | **587**   |
+| **1951**   | **1**                          | **841**   |
+| 1951, 2311 | 2                              | 318       |
+| 1951, 2729 | 2                              | 397       |
+| 1951, 2311 | 2                              | 498       |
+| 1951, 2729 | 2                              | 710       |
+| 2311       | 1                              | 231       |
+| ...        | ...                            | ...       |
+
+We now have to pick those transformations where the top _and_ left edge have one of those hashes (177, 564, 587, 841)
+
+#### finding correct transformations of 1951 to make it a cornerpiece with the correct edges facing outwards
+
+Here are the edge-configurations of every possible transformation of tile 1951.
+
+| transformation            | top     | left    | bottom  | right   |
+| ------------------------- | ------- | ------- | ------- | ------- |
+| Clockwise180              | 177     | 318     | 397     | 587     |
+| Clockwise90, FlipVertical | 318     | 177     | 587     | 397     |
+| FlipHorizontal            | 397     | 498     | 177     | 841     |
+| Clockwise270              | 498     | 397     | 841     | 177     |
+| **FlipVertical**          | **564** | **587** | **710** | **318** |
+| **Clockwise90**           | **587** | **564** | **318** | **710** |
+| NoOp                      | 710     | 841     | 564     | 498     |
+| FlipVertical, Clockwise90 | 841     | 710     | 498     | 564     |
+
+We now know, that there are only two valid transformations of tile 1951: FlipVertical and Clockwise90.
+
+With this information we can orient the neighbors of 1951 properly.
+
+#### orienting the neighbors
+
+We know from above that 1951 only has two possible neighbors.
+
+| tile id | matching tiles |
+| ------- | -------------- |
+| 1951    | 2311,2729      |
+
+Let's expand that relationship further.
+
+| tile1 id | transformation tile1 | tile2 id | transformation tile2 | match direction | hash of matching edge |
+| -------: | -------------------- | -------- | -------------------- | --------------- | --------------------: |
+|     1951 | FlipVertical         | 2311     | FlipVertical         | horizontal      |                   318 |
+|     1951 | FlipVertical         | 2729     | FlipVertical         | vertical        |                   564 |
+|     1951 | Clockwise90          | 2729     | Clockwise90          | horizontal      |                   710 |
+|     1951 | Clockwise90          | 2311     | Clockwise90          | vertical        |                   587 |
+
+We have two possibilities to arange these pieces
+
+| y\x | 0                                                                                                                                     | 1                                                                                                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | 1951 FlipVertical <br> <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" />      | 2311 FlipVertical <br> <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> <br> 2729 FlipVertical <br> |                                                                                                                                  |
+
+| y\x | 0                                                                                                                                   | 1                                                                                                                              |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 0   | 1951 Clockwise90 <br> <img src="./tile-transformations/1951_Clockwise90.png" width="150" style="image-rendering: pixelated" />      | 2729 Clockwise90 <br> <img src="./tile-transformations/2729_Clockwise90.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2311_Clockwise90.png" width="150" style="image-rendering: pixelated" /> <br> 2311 Clockwise90 <br> |                                                                                                                                |
+
+#### more constraints
+
+We know that the piece at (1,0) has to have its top edge outwards-facing.
+
+| tile ids | number of tiles with that edge | edge hash |
+| -------- | ------------------------------ | --------- |
+| 2311     | 1                              | 231       |
+| 2311     | 1                              | 924       |
+| 2729     | 1                              | 271       |
+| 2729     | 1                              | 962       |
+
+Here are the tile-configurations of 2311 and 2729 after applying the possible transformations (FlipVertical and Clockwise90)
+
+| id   | transformation | top     | left    | bottom | right |
+| ---- | -------------- | ------- | ------- | ------ | ----- |
+| 2311 | FlipVertical   | **231** | 318     | 210    | 616   |
+| 2311 | Clockwise90    | 318     | **231** | 616    | 210   |
+| 2729 | FlipVertical   | 710     | **962** | 85     | 9     |
+| 2729 | Clockwise90    | **962** | 710     | 9      | 85    |
+
+Let's examine 2311:
+
+- if we put 2311 at (1,0) we have to apply FlipVertical. The the top edge has to be facing outwards, which it does (hash 231).
+- if we put 2311 at (0,1) we have to apply Clockwise90. The the left edge has to be facing outwards, which it does (hash 231).
+
+Let's examine 2729:
+
+- if we put 2729 at (1,0) we have to apply Clockwise90. The the top edge has to be facing outwards, which it does (hash 962).
+- if we put 2729 at (0,1) we have to apply FlipVertical. The the left edge has to be facing outwards, which it does (hash 962).
+
+This doesn't help us either, since these configurations are still valid.
+
+#### finding tiles with two neighbors
+
+We want to place the tile (1,1). It has to satisfy the following condition
+
+```scala
+   tile(1,1).top  == tile(1,0).bottom
+&& tile(1,1).left == tile(0,1).right
+```
+
+| id   | transformation | x   | y   | top | left | bottom | right |
+| ---- | -------------- | --- | --- | --- | ---- | ------ | ----- |
+| 2311 | FlipVertical   | 1   | 0   | 231 | 318  | 210    | 616   |
+| 2729 | FlipVertical   | 0   | 1   | 710 | 962  | 85     | 9     |
+| 2729 | Clockwise90    | 1   | 0   | 962 | 710  | 9      | 85    |
+| 2311 | Clockwise90    | 0   | 1   | 318 | 231  | 616    | 210   |
+
+This means we're looking for a tile t where
+
+```text
+t.top == 210 && t.left == 9 ||
+t.top == 9   && t.left == 210
+```
+
+| id   | transformation | top | left | bottom | right |
+| ---- | -------------- | --- | ---- | ------ | ----- |
+| 1427 | Clockwise90    | 9   | 210  | 348    | 948   |
+| 1427 | FlipVertical   | 210 | 9    | 948    | 348   |
+
+We have still have two possibilities to arange these pieces.
+
+| y\x | 0                                                                                                                                     | 1                                                                                                                                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | 1951 FlipVertical <br> <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" />      | 2311 FlipVertical <br> <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" />      |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> <br> 2729 FlipVertical <br> | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" /> <br> 1427 FlipVertical <br> |
+
+| y\x | 0                                                                                                                                   | 1                                                                                                                                   |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | 1951 Clockwise90 <br> <img src="./tile-transformations/1951_Clockwise90.png" width="150" style="image-rendering: pixelated" />      | 2729 Clockwise90 <br> <img src="./tile-transformations/2729_Clockwise90.png" width="150" style="image-rendering: pixelated" />      |
+| 1   | <img src="./tile-transformations/2311_Clockwise90.png" width="150" style="image-rendering: pixelated" /> <br> 2311 Clockwise90 <br> | <img src="./tile-transformations/1427_Clockwise90.png" width="150" style="image-rendering: pixelated" /> <br> 1427 Clockwise90 <br> |
+
+#### finding the top right corner piece
+
+We can now look for the top right corner piece with one added constraint. Its left edge has to match the right edge of (1,0). The transformation has to orient the tile in a way that the top and right faces point outwards.
+
+| id   | transformation | top | left | bottom | right |
+| ---- | -------------- | --- | ---- | ------ | ----- |
+| 2971 | Clockwise90    | 78  | 85   | 689    | 161   |
+| 3079 | NoOp           | 702 | 616  | 184    | 264   |
+
+Still two possibilities to arrange our tiles.
+
+| y\x | 0                                                                                                                                     | 1                                                                                                                                     | 2                                                                                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 0   | 1951 FlipVertical <br> <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" />      | 2311 FlipVertical <br> <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" />      | 3079 NoOp <br> <img src="./tile-transformations/3079_NoOp.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> <br> 2729 FlipVertical <br> | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" /> <br> 2729 FlipVertical <br> |                                                                                                                  |
+
+| y\x | 0                                                                                                                                   | 1                                                                                                                                   | 2                                                                                                                              |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 0   | 1951 Clockwise90 <br> <img src="./tile-transformations/1951_Clockwise90.png" width="150" style="image-rendering: pixelated" />      | 2729 Clockwise90 <br> <img src="./tile-transformations/2729_Clockwise90.png" width="150" style="image-rendering: pixelated" />      | 2971 Clockwise90 <br> <img src="./tile-transformations/2971_Clockwise90.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2311_Clockwise90.png" width="150" style="image-rendering: pixelated" /> <br> 2311 Clockwise90 <br> | <img src="./tile-transformations/1427_Clockwise90.png" width="150" style="image-rendering: pixelated" /> <br> 1427 Clockwise90 <br> |                                                                                                                                |
+
+#### finding the bottom left corner piece
+
+We can now look for the bottom left corner piece with one added constraint. Its top edge has to match the bottom edge of (0,1). The transformation has to orient the tile in a way that the bottom and left faces point outwards.
+
+| id   | transformation            | top | left | bottom | right |
+| ---- | ------------------------- | --- | ---- | ------ | ----- |
+| 2971 | FlipVertical              | 85  | 78   | 161    | 689   |
+| 3079 | FlipVertical, Clockwise90 | 616 | 702  | 264    | 184   |
+
+| y\x | 0                                                                                                                                | 1                                                                                                                                |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | 1951 FlipVertical <br> <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | 2311 FlipVertical <br> <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" />                        | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" />                        |
+| 2   | <img src="./tile-transformations/2971_FlipVertical.png" width="150" style="image-rendering: pixelated" />                        |                                                                                                                                  |
+
+| y\x | 0                                                                                                                              | 1                                                                                                                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| 0   | 1951 Clockwise90 <br> <img src="./tile-transformations/1951_Clockwise90.png" width="150" style="image-rendering: pixelated" /> | 2729 Clockwise90 <br> <img src="./tile-transformations/2729_Clockwise90.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2311_Clockwise90.png" width="150" style="image-rendering: pixelated" />                       | <img src="./tile-transformations/1427_Clockwise90.png" width="150" style="image-rendering: pixelated" />                       |
+| 2   | <img src="./tile-transformations/3079_FlipVerticalClockwise90.png" width="150" style="image-rendering: pixelated" />           |                                                                                                                                |
+
+### mirrored symmetry
+
+We see that it's going to continue to find two possibilities, since the whole thing can be mirrored. For completing the example we just pick the first configuration.
+For that we place 2971 at (2,0) and 3079 at (0,2).
+
+| y\x | 0                 | 1                 | 2         |
+| --- | ----------------- | ----------------- | --------- |
+| 0   | 1951 FlipVertical | 2311 FlipVertical | 3079 NoOp |
+| 1   | 2729 FlipVertical | 1427 FlipVertical |           |
+| 2   | 2971 FlipVertical |                   |           |
+
+| y\x | 0                                                                                                         | 1                                                                                                         | 2                                                                                                 |
+| --- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 0   | <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/3079_NoOp.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |                                                                                                   |
+| 2   | <img src="./tile-transformations/2971_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |                                                                                                           |                                                                                                   |
+
+### continue to fill the missing pieces
+
+#### (1,2)
+
+| id   | transformation | top | left | bottom | right |
+| ---- | -------------- | --- | ---- | ------ | ----- |
+| 1489 | FlipVertical   | 948 | 689  | 848    | 288   |
+
+| y\x | 0                                                                                                         | 1                                                                                                         | 2                                                                                                 |
+| --- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 0   | <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/3079_NoOp.png" width="150" style="image-rendering: pixelated" /> |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |                                                                                                   |
+| 2   | <img src="./tile-transformations/2971_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1489_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |                                                                                                   |
+
+#### (2,1)
+
+| id   | transformation            | top | left | bottom | right |
+| ---- | ------------------------- | --- | ---- | ------ | ----- |
+| 2473 | Clockwise90, FlipVertical | 184 | 348  | 399    | 481   |
+
+| y\x | 0                                                                                                         | 1                                                                                                         | 2                                                                                                                    |
+| --- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 0   | <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/3079_NoOp.png" width="150" style="image-rendering: pixelated" />                    |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/2473_Clockwise90FlipVertical.png" width="150" style="image-rendering: pixelated" /> |
+| 2   | <img src="./tile-transformations/2971_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1489_FlipVertical.png" width="150" style="image-rendering: pixelated" /> |                                                                                                                      |
+
+#### (2,2)
+
+Yay - our last cornerpiece
+
+| id   | transformation | top | left | bottom | right |
+| ---- | -------------- | --- | ---- | ------ | ----- |
+| 1171 | FlipHorizontal | 399 | 288  | 96     | 902   |
+
+### the last piece
+
+| y\x | 0                                                                                                         | 1                                                                                                         | 2                                                                                                                    |
+| --- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 0   | <img src="./tile-transformations/1951_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/2311_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/3079_NoOp.png" width="150" style="image-rendering: pixelated" />                    |
+| 1   | <img src="./tile-transformations/2729_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1427_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/2473_Clockwise90FlipVertical.png" width="150" style="image-rendering: pixelated" /> |
+| 2   | <img src="./tile-transformations/2971_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1489_FlipVertical.png" width="150" style="image-rendering: pixelated" /> | <img src="./tile-transformations/1171_FlipHorizontal.png" width="150" style="image-rendering: pixelated" />          |
+
+### generalizing the rules
+
+- pick one of the cornerpieces for (0,0) and orient it
+  - top and left edges must face outwards
+  - if there are more than one possible transformation, pick one of them
+
+```scala
+  val filterFn: ((Int, Edge, List[Transformation], BufferedImage)) => Boolean = { row =>
+    (useTopTileFilter, useLeftTileFilter) match {
+      case (true, true)   => topTileFilter(row) && leftTileFilter(row)
+      case (true, false)  => topTileFilter(row) && leftOuterFilter(row)
+      case (false, true)  => leftTileFilter(row) && topOuterFilter(row)
+      case (false, false) => topOuterFilter(row) && leftOuterFilter(row)
+    }
+  }
+
+```
+
+## finding Nessi
+
+### the final assembly
+
+| assembled image <br> with borders                                                                        | assembled image <br> with highlighted border                                                                 | final version <br> with borders removed                                                                    |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| <img src="./final-images/final_with_borders_NoOp.png" height="330" style="image-rendering: pixelated" /> | <img src="./final-images/final_with_red_borders_NoOp.png" height="330" style="image-rendering: pixelated" /> | <img src="./final-images/final_without_borders_NoOp.png" width="264" style="image-rendering: pixelated" /> |
+
+<!-- with borders -->
+<!-- (10) * 3 = 30 -->
+
+<!-- with red grid -->
+<!-- 1 + (10 + 1) * 3 = 34 -->
+
+<!-- without borders -->
+<!-- (10 -2) * 3 = 24 -->
+
+### nessi
+
+We have to find this pattern in the final image, but (of course) we don't know how the image has been transformed.
+
+```text
+                  #
+#    ##    ##    ###
+ #  #  #  #  #  #
+```
+
+<img src="./sea_monster.png" width="220" style="image-rendering: pixelated" />
