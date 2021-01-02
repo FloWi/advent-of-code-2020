@@ -10,9 +10,11 @@ import java.awt.image.BufferedImage
 import java.nio.file.Files
 import javax.imageio.ImageIO
 
-class Day20Part1Test extends AnyFunSuite with Matchers {
+class Day20Test extends AnyFunSuite with Matchers {
   private val input = Helper.source(Some("src/main/resources/day20-example.txt")).mkString
   private val inputSeaMonster = Helper.source(Some("src/main/resources/day20-sea-monster.txt")).mkString
+  private val inputExpectedAssemblyWithoutBorders = Helper.source(Some("src/main/resources/day20-expected-assembly-without-borders.txt")).mkString
+  private val inputExpectedFinal = Helper.source(Some("src/main/resources/day20-expected-final-image.txt")).mkString
   private val tileMap = parseTiles(input)
   private val transformedTileMap = getTileTransformations(tileMap)
 
@@ -94,7 +96,7 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
     val allTiles = assembleTiles(transformedTileMap)
 
     val pictures = assemblePicture(allTiles)
-    pictures.withBorders.getWidth shouldBe pictures.withoutBorders.getWidth + 6
+    pictures.withBorders.getWidth shouldBe pictures.withoutBorders.getWidth + math.sqrt(transformedTileMap.size).toInt * 2
 
     val transformedImages = distinctTransformations.map { transformations =>
       val withBorders = applyTransformations(pictures.withBorders, transformations)
@@ -113,10 +115,45 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
 
   }
 
-  test("sea monster") {
-    val seaMonster = parseImage(inputSeaMonster.split("\n").toList)
+  test("sea monster and final image") {
+    val solution = part2.solve(input, inputSeaMonster)
+
     val tempFolder = Files.createTempDirectory("AOC2020_day20_")
-    ImageIO.write(seaMonster, "png", tempFolder.resolve(s"sea_monster.png").toFile)
+
+    ImageIO.write(solution.image, "png", tempFolder.resolve(s"final_image_${solution.transformations.mkString}.png").toFile)
+    val imgWithGreenSeaMonster = new BufferedImage(solution.image.getWidth, solution.image.getHeight, BufferedImage.TYPE_INT_RGB)
+
+    val brown = new Color(102, 51, 0)
+
+    0
+      .until(solution.image.getWidth)
+      .foreach { x =>
+        0.until(solution.image.getHeight)
+          .foreach { y =>
+            val coord = (x, y)
+            val color =
+              if (solution.seaMonsterPixels.contains(coord)) Color.green.darker
+              else {
+                if (solution.image.getRGB(x, y) == Color.WHITE.getRGB) Color.BLUE
+                else {
+                  brown
+                }
+              }
+            imgWithGreenSeaMonster.setRGB(x, y, color.getRGB)
+          }
+      }
+
+    ImageIO.write(imgWithGreenSeaMonster, "png", tempFolder.resolve(s"final_image_colored.png").toFile)
+
+  }
+
+  test("test finding sea monsters in example image") {
+    val seaMonster = parseImage(inputSeaMonster.split("\n").toList)
+    val expectedAssemlbyWithoutBorders = parseImage(inputExpectedAssemblyWithoutBorders.split("\n").toList)
+    val expectedfinalImage = parseImage(inputExpectedFinal.split("\n").toList)
+
+    findSeaMonsters(expectedfinalImage, seaMonster).map(_.topLeftCoordinates) should contain theSameElementsAs List((1, 16), (2, 2))
+    findSeaMonsters(expectedAssemlbyWithoutBorders, seaMonster).map(_.topLeftCoordinates) should contain theSameElementsAs List.empty
   }
 
   test("print edge map") {
@@ -128,12 +165,6 @@ class Day20Part1Test extends AnyFunSuite with Matchers {
         println(s"$id;${edge.top};${edge.right};${edge.bottom};${edge.left};${transformations.mkString(", ")}")
       }
     }
-  }
-
-  test("transform tiles to match") {
-
-    ???
-
   }
 
   def writeTransformedTilesToDisk(transformedTileMap: Map[Int, (BufferedImage, Map[List[Transformation], BufferedImage])]): Unit = {

@@ -1,12 +1,24 @@
 package day20
 
-import day20.Day20.{findCornerPieces, getTileTransformations, parseTiles}
+import day20.Day20.{
+  FinalImages,
+  applyTransformations,
+  assemblePicture,
+  assembleTiles,
+  distinctTransformations,
+  findCornerPieces,
+  findImageWithSeaMonster,
+  findSeaMonsters,
+  getTileTransformations,
+  parseImage,
+  parseTiles
+}
 import day20.Dijkstra.{Graph, shortestPath}
+import helper.Helper
 import helper.Helper._
 
 import java.awt.Color
 import java.awt.image.BufferedImage
-import scala.collection.MapView
 
 object part1 {
 
@@ -22,6 +34,31 @@ object part1 {
 
     val solution = cornerPieces.map(_.toLong).product
     println(s"Solution for ${getCallingMainClass} is: $solution")
+  }
+}
+
+object part2 {
+
+  def main(args: Array[String]): Unit = {
+
+    val input = source(args.headOption).mkString
+    val inputSeaMonster = Helper.source(Some("src/main/resources/day20-sea-monster.txt")).mkString
+
+    val solution = solve(input, inputSeaMonster)
+    println(s"Solution for ${getCallingMainClass} is: ${solution.numberOfWaterPixelsNotOccupiedBySeaMonster}")
+  }
+
+  def solve(input: String, inputSeaMonster: String): Day20.Part2Result = {
+    val transformedTileMap = getTileTransformations(parseTiles(input))
+
+    val allTiles = assembleTiles(transformedTileMap)
+
+    val finalAssembly = assemblePicture(allTiles).withoutBorders
+    val seaMonster = parseImage(inputSeaMonster.split("\n").toList)
+
+    val solution = findImageWithSeaMonster(finalAssembly, seaMonster)
+
+    solution
   }
 }
 
@@ -47,6 +84,15 @@ object Day20 {
   object Rotation {
     val all = List(Clockwise90, Clockwise180, Clockwise270)
   }
+
+  case class Part2Result(
+      transformations: List[Day20.Transformation],
+      image: BufferedImage,
+      seaMonsterPixels: Set[(Int, Int)],
+      numberOfWaterPixelsNotOccupiedBySeaMonster: Int
+  )
+
+  case class SeaMonsterSighting(topLeftCoordinates: (Int, Int), allCoordinatesOfSeaMonster: Vector[(Int, Int)])
 
   def parseTiles(input: String): Map[Int, BufferedImage] = {
     val tiles = input.split("\n\n").map(_.split("\n").toList).toList
@@ -517,6 +563,83 @@ object Day20 {
     }
 
     result
+  }
+
+  def findSeaMonsters(image: BufferedImage, seaMonsterImage: BufferedImage): List[SeaMonsterSighting] = {
+
+    //image 24x24
+    //sea maonster: 20x3
+
+    val deltaX = image.getWidth - seaMonsterImage.getWidth
+    val deltaY = image.getHeight - seaMonsterImage.getHeight
+
+    val startingCoords = 0
+      .until(deltaX)
+      .flatMap(x =>
+        0.until(deltaY)
+          .map(y => (x, y))
+      )
+
+    val seaMonsterCoords = 0
+      .until(seaMonsterImage.getWidth)
+      .flatMap(x =>
+        0.until(seaMonsterImage.getHeight)
+          .map(y => (x, y))
+      )
+      .filter { case (x, y) =>
+        seaMonsterImage.getRGB(x, y) == Color.WHITE.getRGB
+      }
+      .toVector
+
+    val matchesPerCoordinate = startingCoords.map { case pos @ (xOffset, yOffset) =>
+      val absoluteSeaMonsterCoords = seaMonsterCoords.map { case (xSea, ySea) =>
+        val x = xSea + xOffset
+        val y = ySea + yOffset
+        (x, y)
+      }
+      val cnt = absoluteSeaMonsterCoords.count { case (x, y) =>
+        image.getRGB(x, y) == Color.white.getRGB
+      }
+
+      (pos, cnt, absoluteSeaMonsterCoords)
+    }.toList
+
+    val seaMonsterStartingCoords = matchesPerCoordinate.filter(_._2 == seaMonsterCoords.size)
+
+    seaMonsterStartingCoords.map { case (starting, _, allCoordsOfSeaMonster) => SeaMonsterSighting(starting, allCoordsOfSeaMonster) }
+  }
+
+  def findImageWithSeaMonster(finalAssembly: BufferedImage, seaMonster: BufferedImage): Part2Result = {
+    val transformedImages = distinctTransformations.map { transformations =>
+      (transformations, applyTransformations(finalAssembly, transformations))
+    }
+
+    val results = transformedImages.map { case (transformations, img) =>
+      (transformations, img, findSeaMonsters(img, seaMonster))
+    }
+
+    val validResults = results.filter(_._3.nonEmpty)
+
+    assert(validResults.size == 1)
+    val validResult = validResults.head
+
+    val seaMonsterPixels = validResult._3.flatMap(_.allCoordinatesOfSeaMonster).toSet
+
+    val waterPixels = 0
+      .until(validResult._2.getWidth)
+      .flatMap(x =>
+        0.until(validResult._2.getHeight)
+          .map(y => (x, y))
+      )
+      .filter { case (x, y) =>
+        validResult._2.getRGB(x, y) == Color.WHITE.getRGB
+      }
+      .toSet
+
+    val waterPixelsNotOccupiedBySeaMonster = waterPixels.diff(seaMonsterPixels)
+
+    Part2Result(validResult._1, validResult._2, seaMonsterPixels, waterPixelsNotOccupiedBySeaMonster.size)
+
   }
 
 }

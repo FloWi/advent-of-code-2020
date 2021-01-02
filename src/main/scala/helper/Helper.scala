@@ -1,8 +1,7 @@
 package helper
-import java.nio.file.Paths
-import java.io.File
-import scala.io.Source
-import scala.io.BufferedSource
+
+import scala.io.{BufferedSource, Source}
+
 object Helper {
 
   def getCallingMainClass: Class[_] = {
@@ -13,11 +12,11 @@ object Helper {
 
     val className = stacktrace
       .find { t =>
-        val name = t.getClassName()
+        val name = t.getClassName
         name.startsWith("day") && name.contains("part") && !name.contains("$")
       }
       .get
-      .getClassName()
+      .getClassName
     Class.forName(className)
   }
 
