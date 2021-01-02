@@ -1,0 +1,2804 @@
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Free Markdown to HTML Converter</title>
+
+    <link rel="stylesheet" href="github-markdown.css" />
+  </head>
+
+  <body class="markdown-body">
+    <h1 id="day-20">day 20</h1>
+    <h2 id="transformations">transformations</h2>
+    <p>
+      I didn&#39;t want to calculate the image transformations myself, so I used
+      java&#39;s <code>java.awt.geom.AffineTransform</code>. I created a 4x4
+      testimage with 16 different shades of red to calculate a hash of the
+      overall image to check, which transformation yield the same result.
+    </p>
+    <p>all 18 possible transformations</p>
+    <ul>
+      <li>Clockwise180</li>
+      <li>Clockwise180,FlipHorizontal</li>
+      <li>Clockwise180,FlipVertical</li>
+      <li>Clockwise270</li>
+      <li>Clockwise270,FlipHorizontal</li>
+      <li>Clockwise270,FlipVertical</li>
+      <li>Clockwise90</li>
+      <li>Clockwise90,FlipHorizontal</li>
+      <li>Clockwise90,FlipVertical</li>
+      <li>FlipHorizontal</li>
+      <li>FlipHorizontal,Clockwise180</li>
+      <li>FlipHorizontal,Clockwise270</li>
+      <li>FlipHorizontal,Clockwise90</li>
+      <li>FlipVertical</li>
+      <li>FlipVertical,Clockwise180</li>
+      <li>FlipVertical,Clockwise270</li>
+      <li>FlipVertical,Clockwise90</li>
+      <li>NoOp</li>
+    </ul>
+    <h3 id="examples-of-different-transformations-yielding-the-same-image">
+      examples of different transformations yielding the same image
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>image</th>
+          <th>transformations</th>
+          <th>hash</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_0153045607590105120135150165180195210225_NoOp.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>NoOp</td>
+          <td>0153045607590105120135150165180195210225</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_0601201801575135195309015021045105165225_Clockwise270FlipVertical.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise270, FlipVertical</td>
+          <td>0601201801575135195309015021045105165225</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_0601201801575135195309015021045105165225_FlipVerticalClockwise90.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>0601201801575135195309015021045105165225</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_1801952102251201351501656075901050153045_Clockwise180FlipVertical.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise180, FlipVertical</td>
+          <td>1801952102251201351501656075901050153045</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_1801952102251201351501656075901050153045_FlipHorizontal.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipHorizontal</td>
+          <td>1801952102251201351501656075901050153045</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="there-are-only-8-distinct-transformations">
+      There are only 8 distinct transformations
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>image</th>
+          <th>transformations</th>
+          <th>hash</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_0153045607590105120135150165180195210225_NoOp.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>NoOp</td>
+          <td>0153045607590105120135150165180195210225</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_4510516522530901502101575135195060120180_Clockwise90.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise90</td>
+          <td>4510516522530901502101575135195060120180</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_2252101951801651501351201059075604530150_Clockwise180.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise180</td>
+          <td>2252101951801651501351201059075604530150</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_1801206001951357515210150903022516510545_Clockwise270.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise270</td>
+          <td>1801206001951357515210150903022516510545</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_2251651054521015090301951357515180120600_Clockwise90FlipVertical.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2251651054521015090301951357515180120600</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_1801952102251201351501656075901050153045_FlipHorizontal.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipHorizontal</td>
+          <td>1801952102251201351501656075901050153045</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_4530150105907560165150135120225210195180_FlipVertical.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipVertical</td>
+          <td>4530150105907560165150135120225210195180</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./image-transformations/image_hash_0601201801575135195309015021045105165225_FlipVerticalClockwise90.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>0601201801575135195309015021045105165225</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="image-transformations">image transformations</h2>
+    <p>take this tile from the example input</p>
+    <pre><code class="lang-text">Tile <span class="hljs-number">1951</span>:
+#.##...##.
+#.####...#
+.....#..##
+#...######
+.##.#....#
+.###.#####
+###.##.##.
+.###....#.
+..#.#..#.#
+#...##.#..
+</code></pre>
+    <h3 id="tiles-as-images">tiles as images</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>image</th>
+          <th>transformations</th>
+          <th>image</th>
+          <th>transformations</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <img
+              src="./tile-transformations/1951_NoOp.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>NoOp</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_Clockwise90FlipVertical.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise90, FlipVertical</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./tile-transformations/1951_Clockwise90.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise90</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipHorizontal.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipHorizontal</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./tile-transformations/1951_Clockwise180.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise180</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipVertical</td>
+        </tr>
+        <tr>
+          <td>
+            <img
+              src="./tile-transformations/1951_Clockwise270.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>Clockwise270</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipVerticalClockwise90.png"
+              width="50"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>FlipVertical, Clockwise90</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="calculating-edges">calculating edges</h2>
+    <h3 id="hashes-of-edges">hashes of edges</h3>
+    <h2 id="matching-tiles-horizontally-and-vertically">
+      matching tiles horizontally and vertically
+    </h2>
+    <h3 id="match-direction-vertical">match-direction: vertical</h3>
+    <pre><code class="lang-text">id1 (<span class="hljs-name">top</span>)
+id2 (<span class="hljs-name">bottom</span>)
+</code></pre>
+    <h3 id="match-direction-horizontal">match-direction: horizontal</h3>
+    <pre><code class="lang-text">id1 (<span class="hljs-built_in">left</span>) | <span class="hljs-type">id2</span> (<span class="hljs-built_in">right</span>)
+</code></pre>
+    <h3 id="matching-tiles">matching tiles</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>tile1 id</th>
+          <th>transformation tile1</th>
+          <th>tile2 id</th>
+          <th>transformation tile2</th>
+          <th>match direction</th>
+          <th>hash of matching edge</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1171</td>
+          <td>NoOp</td>
+          <td>1489</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>288</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>FlipVertical</td>
+          <td>1489</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>18</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>Clockwise90</td>
+          <td>1489</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>391</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1489</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>902</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>Clockwise90</td>
+          <td>2473</td>
+          <td>NoOp</td>
+          <td>horizontal</td>
+          <td>966</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2473</td>
+          <td>FlipVertical</td>
+          <td>horizontal</td>
+          <td>399</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>Clockwise180</td>
+          <td>2473</td>
+          <td>Clockwise90</td>
+          <td>vertical</td>
+          <td>96</td>
+        </tr>
+        <tr>
+          <td>1171</td>
+          <td>FlipVertical</td>
+          <td>2473</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>vertical</td>
+          <td>24</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise90</td>
+          <td>1489</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td>948</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>1489</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>horizontal</td>
+          <td>183</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise180</td>
+          <td>1489</td>
+          <td>Clockwise180</td>
+          <td>vertical</td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipVertical</td>
+          <td>1489</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td>210</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>2311</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>horizontal</td>
+          <td>210</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise270</td>
+          <td>2311</td>
+          <td>Clockwise270</td>
+          <td>horizontal</td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipHorizontal</td>
+          <td>2311</td>
+          <td>FlipHorizontal</td>
+          <td>vertical</td>
+          <td>183</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>NoOp</td>
+          <td>2311</td>
+          <td>NoOp</td>
+          <td>vertical</td>
+          <td>948</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>NoOp</td>
+          <td>2473</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td>234</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipVertical</td>
+          <td>2473</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>horizontal</td>
+          <td>348</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise90</td>
+          <td>2473</td>
+          <td>Clockwise180</td>
+          <td>vertical</td>
+          <td>9</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>2473</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td>576</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipHorizontal</td>
+          <td>2729</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>576</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise180</td>
+          <td>2729</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>9</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2729</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>348</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise270</td>
+          <td>2729</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>234</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>NoOp</td>
+          <td>1171</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>18</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>FlipVertical</td>
+          <td>1171</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>288</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>Clockwise90</td>
+          <td>1171</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>689</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1171</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>565</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1427</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>horizontal</td>
+          <td>948</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>Clockwise270</td>
+          <td>1427</td>
+          <td>Clockwise270</td>
+          <td>horizontal</td>
+          <td>183</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>FlipHorizontal</td>
+          <td>1427</td>
+          <td>FlipHorizontal</td>
+          <td>vertical</td>
+          <td>43</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>NoOp</td>
+          <td>1427</td>
+          <td>NoOp</td>
+          <td>vertical</td>
+          <td>848</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>FlipHorizontal</td>
+          <td>2971</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>565</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>Clockwise180</td>
+          <td>2971</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>689</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2971</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>288</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>Clockwise270</td>
+          <td>2971</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>18</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>NoOp</td>
+          <td>2311</td>
+          <td>NoOp</td>
+          <td>horizontal</td>
+          <td>498</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>FlipVertical</td>
+          <td>2311</td>
+          <td>FlipVertical</td>
+          <td>horizontal</td>
+          <td>318</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>Clockwise90</td>
+          <td>2311</td>
+          <td>Clockwise90</td>
+          <td>vertical</td>
+          <td>587</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>2311</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>vertical</td>
+          <td>841</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>Clockwise90</td>
+          <td>2729</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td>710</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2729</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>horizontal</td>
+          <td>397</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>Clockwise180</td>
+          <td>2729</td>
+          <td>Clockwise180</td>
+          <td>vertical</td>
+          <td>177</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>FlipVertical</td>
+          <td>2729</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td>564</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise90</td>
+          <td>1427</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td>210</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>1427</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>horizontal</td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise180</td>
+          <td>1427</td>
+          <td>Clockwise180</td>
+          <td>vertical</td>
+          <td>924</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>FlipVertical</td>
+          <td>1427</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td>231</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>FlipHorizontal</td>
+          <td>1951</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>498</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise180</td>
+          <td>1951</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>318</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>1951</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>616</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise270</td>
+          <td>1951</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>89</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>NoOp</td>
+          <td>3079</td>
+          <td>FlipVertical</td>
+          <td>horizontal</td>
+          <td>89</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>FlipVertical</td>
+          <td>3079</td>
+          <td>NoOp</td>
+          <td>horizontal</td>
+          <td>616</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise90</td>
+          <td>3079</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>vertical</td>
+          <td>318</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>3079</td>
+          <td>Clockwise90</td>
+          <td>vertical</td>
+          <td>498</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>FlipHorizontal</td>
+          <td>1171</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>horizontal</td>
+          <td>966</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>Clockwise180</td>
+          <td>1171</td>
+          <td>Clockwise270</td>
+          <td>horizontal</td>
+          <td>399</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>1171</td>
+          <td>FlipHorizontal</td>
+          <td>vertical</td>
+          <td>184</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>Clockwise270</td>
+          <td>1171</td>
+          <td>NoOp</td>
+          <td>vertical</td>
+          <td>116</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1427</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>234</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>Clockwise270</td>
+          <td>1427</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>348</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>FlipHorizontal</td>
+          <td>1427</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>481</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>NoOp</td>
+          <td>1427</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>542</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>NoOp</td>
+          <td>3079</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>horizontal</td>
+          <td>116</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>FlipVertical</td>
+          <td>3079</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td>184</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>Clockwise90</td>
+          <td>3079</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td>399</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>3079</td>
+          <td>Clockwise180</td>
+          <td>vertical</td>
+          <td>966</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>NoOp</td>
+          <td>1427</td>
+          <td>NoOp</td>
+          <td>horizontal</td>
+          <td>576</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipVertical</td>
+          <td>1427</td>
+          <td>FlipVertical</td>
+          <td>horizontal</td>
+          <td>9</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise90</td>
+          <td>1427</td>
+          <td>Clockwise90</td>
+          <td>vertical</td>
+          <td>962</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1427</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>vertical</td>
+          <td>271</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1951</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>horizontal</td>
+          <td>710</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise270</td>
+          <td>1951</td>
+          <td>Clockwise270</td>
+          <td>horizontal</td>
+          <td>397</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipHorizontal</td>
+          <td>1951</td>
+          <td>FlipHorizontal</td>
+          <td>vertical</td>
+          <td>680</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>NoOp</td>
+          <td>1951</td>
+          <td>NoOp</td>
+          <td>vertical</td>
+          <td>85</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise90</td>
+          <td>2971</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td>85</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2971</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>horizontal</td>
+          <td>680</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise180</td>
+          <td>2971</td>
+          <td>Clockwise180</td>
+          <td>vertical</td>
+          <td>397</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipVertical</td>
+          <td>2971</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td>710</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>NoOp</td>
+          <td>1489</td>
+          <td>NoOp</td>
+          <td>horizontal</td>
+          <td>565</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>FlipVertical</td>
+          <td>1489</td>
+          <td>FlipVertical</td>
+          <td>horizontal</td>
+          <td>689</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>Clockwise90</td>
+          <td>1489</td>
+          <td>Clockwise90</td>
+          <td>vertical</td>
+          <td>78</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>1489</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>vertical</td>
+          <td>456</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>2729</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>horizontal</td>
+          <td>85</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>Clockwise270</td>
+          <td>2729</td>
+          <td>Clockwise270</td>
+          <td>horizontal</td>
+          <td>680</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>FlipHorizontal</td>
+          <td>2729</td>
+          <td>FlipHorizontal</td>
+          <td>vertical</td>
+          <td>532</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>NoOp</td>
+          <td>2729</td>
+          <td>NoOp</td>
+          <td>vertical</td>
+          <td>161</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>FlipHorizontal</td>
+          <td>2311</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>616</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>Clockwise180</td>
+          <td>2311</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>89</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>2311</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>66</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>Clockwise270</td>
+          <td>2311</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>264</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>2473</td>
+          <td>Clockwise180</td>
+          <td>horizontal</td>
+          <td>184</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>Clockwise270</td>
+          <td>2473</td>
+          <td>FlipHorizontal</td>
+          <td>horizontal</td>
+          <td>116</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>FlipHorizontal</td>
+          <td>2473</td>
+          <td>Clockwise270</td>
+          <td>vertical</td>
+          <td>501</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>NoOp</td>
+          <td>2473</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>vertical</td>
+          <td>702</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="finding-the-corner-pieces">finding the corner pieces</h2>
+    <p>
+      If you count the number of matching tiles for each tile, you can determine
+      their place in the picture.
+    </p>
+    <p>
+      The tiles with only two matching tiles must be the edges of the picture.
+      Thankfully, Erik designed the puzzle in a way that this property holds.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>tile id</th>
+          <th>number of matches</th>
+          <th>matching tiles</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1171</td>
+          <td>2</td>
+          <td>1489,2473</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>4</td>
+          <td>1489,2311,2473,2729</td>
+        </tr>
+        <tr>
+          <td>1489</td>
+          <td>3</td>
+          <td>1171,1427,2971</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>2</td>
+          <td>2311,2729</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>3</td>
+          <td>1427,1951,3079</td>
+        </tr>
+        <tr>
+          <td>2473</td>
+          <td>3</td>
+          <td>1171,1427,3079</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>3</td>
+          <td>1427,1951,2971</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>2</td>
+          <td>1489,2729</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>2</td>
+          <td>2311,2473</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>So, our corners are these tiles.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>tile id</th>
+          <th>matching tiles</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1171</td>
+          <td>1489,2473</td>
+        </tr>
+        <tr>
+          <td>1951</td>
+          <td>2311,2729</td>
+        </tr>
+        <tr>
+          <td>2971</td>
+          <td>1489,2729</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>2311,2473</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="assembling-the-picture">assembling the picture</h2>
+    <p>
+      Assembling the picture turns out to be quite complex. First, we have to
+      pick one of the four corner pieces and assume, this is our top-left tile.
+    </p>
+    <p>
+      Let&#39;s pick the aforementioned corner-tile 1951 as our top-left
+      cornerpiece.
+    </p>
+    <p>
+      We now have to figure out how to transform it in a way, such that the
+      matching edges are on the inside - or, we flip it around and look for the
+      edges that face outwards.
+    </p>
+    <h3 id="finding-the-outer-edges">finding the outer edges</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>tile ids</th>
+          <th>number of tiles with that edge</th>
+          <th>edge hash</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <td>1427, 1489</td>
+          <td>2</td>
+          <td>948</td>
+        </tr>
+        <tr>
+          <td><strong>1951</strong></td>
+          <td><strong>1</strong></td>
+          <td><strong>177</strong></td>
+        </tr>
+        <tr>
+          <td><strong>1951</strong></td>
+          <td><strong>1</strong></td>
+          <td><strong>564</strong></td>
+        </tr>
+        <tr>
+          <td><strong>1951</strong></td>
+          <td><strong>1</strong></td>
+          <td><strong>587</strong></td>
+        </tr>
+        <tr>
+          <td><strong>1951</strong></td>
+          <td><strong>1</strong></td>
+          <td><strong>841</strong></td>
+        </tr>
+        <tr>
+          <td>1951, 2311</td>
+          <td>2</td>
+          <td>318</td>
+        </tr>
+        <tr>
+          <td>1951, 2729</td>
+          <td>2</td>
+          <td>397</td>
+        </tr>
+        <tr>
+          <td>1951, 2311</td>
+          <td>2</td>
+          <td>498</td>
+        </tr>
+        <tr>
+          <td>1951, 2729</td>
+          <td>2</td>
+          <td>710</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>1</td>
+          <td>231</td>
+        </tr>
+        <tr>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      We now have to pick those transformations where the top <em>and</em> left
+      edge have one of those hashes (177, 564, 587, 841)
+    </p>
+    <h4
+      id="finding-correct-transformations-of-1951-to-make-it-a-cornerpiece-with-the-correct-edges-facing-outwards"
+    >
+      finding correct transformations of 1951 to make it a cornerpiece with the
+      correct edges facing outwards
+    </h4>
+    <p>
+      Here are the edge-configurations of every possible transformation of tile
+      1951.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Clockwise180</td>
+          <td>177</td>
+          <td>318</td>
+          <td>397</td>
+          <td>587</td>
+        </tr>
+        <tr>
+          <td>Clockwise90, FlipVertical</td>
+          <td>318</td>
+          <td>177</td>
+          <td>587</td>
+          <td>397</td>
+        </tr>
+        <tr>
+          <td>FlipHorizontal</td>
+          <td>397</td>
+          <td>498</td>
+          <td>177</td>
+          <td>841</td>
+        </tr>
+        <tr>
+          <td>Clockwise270</td>
+          <td>498</td>
+          <td>397</td>
+          <td>841</td>
+          <td>177</td>
+        </tr>
+        <tr>
+          <td><strong>FlipVertical</strong></td>
+          <td><strong>564</strong></td>
+          <td><strong>587</strong></td>
+          <td><strong>710</strong></td>
+          <td><strong>318</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Clockwise90</strong></td>
+          <td><strong>587</strong></td>
+          <td><strong>564</strong></td>
+          <td><strong>318</strong></td>
+          <td><strong>710</strong></td>
+        </tr>
+        <tr>
+          <td>NoOp</td>
+          <td>710</td>
+          <td>841</td>
+          <td>564</td>
+          <td>498</td>
+        </tr>
+        <tr>
+          <td>FlipVertical, Clockwise90</td>
+          <td>841</td>
+          <td>710</td>
+          <td>498</td>
+          <td>564</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      We now know, that there are only two valid transformations of tile 1951:
+      FlipVertical and Clockwise90.
+    </p>
+    <p>With this information we can orient the neighbors of 1951 properly.</p>
+    <h4 id="orienting-the-neighbors">orienting the neighbors</h4>
+    <p>We know from above that 1951 only has two possible neighbors.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>tile id</th>
+          <th>matching tiles</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1951</td>
+          <td>2311,2729</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Let&#39;s expand that relationship further.</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align: right">tile1 id</th>
+          <th>transformation tile1</th>
+          <th>tile2 id</th>
+          <th>transformation tile2</th>
+          <th>match direction</th>
+          <th style="text-align: right">hash of matching edge</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: right">1951</td>
+          <td>FlipVertical</td>
+          <td>2311</td>
+          <td>FlipVertical</td>
+          <td>horizontal</td>
+          <td style="text-align: right">318</td>
+        </tr>
+        <tr>
+          <td style="text-align: right">1951</td>
+          <td>FlipVertical</td>
+          <td>2729</td>
+          <td>FlipVertical</td>
+          <td>vertical</td>
+          <td style="text-align: right">564</td>
+        </tr>
+        <tr>
+          <td style="text-align: right">1951</td>
+          <td>Clockwise90</td>
+          <td>2729</td>
+          <td>Clockwise90</td>
+          <td>horizontal</td>
+          <td style="text-align: right">710</td>
+        </tr>
+        <tr>
+          <td style="text-align: right">1951</td>
+          <td>Clockwise90</td>
+          <td>2311</td>
+          <td>Clockwise90</td>
+          <td>vertical</td>
+          <td style="text-align: right">587</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>We have two possibilities to arange these pieces</p>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 FlipVertical <br />
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2311 FlipVertical <br />
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2729 FlipVertical <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 Clockwise90 <br />
+            <img
+              src="./tile-transformations/1951_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2729 Clockwise90 <br />
+            <img
+              src="./tile-transformations/2729_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2311_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2311 Clockwise90 <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="more-constraints">more constraints</h4>
+    <p>
+      We know that the piece at (1,0) has to have its top edge outwards-facing.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>tile ids</th>
+          <th>number of tiles with that edge</th>
+          <th>edge hash</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2311</td>
+          <td>1</td>
+          <td>231</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>1</td>
+          <td>924</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>1</td>
+          <td>271</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>1</td>
+          <td>962</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Here are the tile-configurations of 2311 and 2729 after applying the
+      possible transformations (FlipVertical and Clockwise90)
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2311</td>
+          <td>FlipVertical</td>
+          <td><strong>231</strong></td>
+          <td>318</td>
+          <td>210</td>
+          <td>616</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise90</td>
+          <td>318</td>
+          <td><strong>231</strong></td>
+          <td>616</td>
+          <td>210</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipVertical</td>
+          <td>710</td>
+          <td><strong>962</strong></td>
+          <td>85</td>
+          <td>9</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise90</td>
+          <td><strong>962</strong></td>
+          <td>710</td>
+          <td>9</td>
+          <td>85</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Let&#39;s examine 2311:</p>
+    <ul>
+      <li>
+        if we put 2311 at (1,0) we have to apply FlipVertical. The the top edge
+        has to be facing outwards, which it does (hash 231).
+      </li>
+      <li>
+        if we put 2311 at (0,1) we have to apply Clockwise90. The the left edge
+        has to be facing outwards, which it does (hash 231).
+      </li>
+    </ul>
+    <p>Let&#39;s examine 2729:</p>
+    <ul>
+      <li>
+        if we put 2729 at (1,0) we have to apply Clockwise90. The the top edge
+        has to be facing outwards, which it does (hash 962).
+      </li>
+      <li>
+        if we put 2729 at (0,1) we have to apply FlipVertical. The the left edge
+        has to be facing outwards, which it does (hash 962).
+      </li>
+    </ul>
+    <p>
+      This doesn&#39;t help us either, since these configurations are still
+      valid.
+    </p>
+    <h4 id="finding-tiles-with-two-neighbors">
+      finding tiles with two neighbors
+    </h4>
+    <p>
+      We want to place the tile (1,1). It has to satisfy the following condition
+    </p>
+    <pre><code class="lang-scala">   tile(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>).top  == tile(<span class="hljs-number">1</span>,<span class="hljs-number">0</span>).bottom
+&amp;&amp; tile(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>).left == tile(<span class="hljs-number">0</span>,<span class="hljs-number">1</span>).right
+</code></pre>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>x</th>
+          <th>y</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2311</td>
+          <td>FlipVertical</td>
+          <td>1</td>
+          <td>0</td>
+          <td>231</td>
+          <td>318</td>
+          <td>210</td>
+          <td>616</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>FlipVertical</td>
+          <td>0</td>
+          <td>1</td>
+          <td>710</td>
+          <td>962</td>
+          <td>85</td>
+          <td>9</td>
+        </tr>
+        <tr>
+          <td>2729</td>
+          <td>Clockwise90</td>
+          <td>1</td>
+          <td>0</td>
+          <td>962</td>
+          <td>710</td>
+          <td>9</td>
+          <td>85</td>
+        </tr>
+        <tr>
+          <td>2311</td>
+          <td>Clockwise90</td>
+          <td>0</td>
+          <td>1</td>
+          <td>318</td>
+          <td>231</td>
+          <td>616</td>
+          <td>210</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>This means we&#39;re looking for a tile t where</p>
+    <pre><code class="lang-text">t.<span class="hljs-built_in">top</span> == <span class="hljs-number">210</span> &amp;&amp; t.<span class="hljs-built_in">left</span> == <span class="hljs-number">9</span> |<span class="hljs-type">|
+t</span>.<span class="hljs-built_in">top</span> == <span class="hljs-number">9</span>   &amp;&amp; t.<span class="hljs-built_in">left</span> == <span class="hljs-number">210</span>
+</code></pre>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1427</td>
+          <td>Clockwise90</td>
+          <td>9</td>
+          <td>210</td>
+          <td>348</td>
+          <td>948</td>
+        </tr>
+        <tr>
+          <td>1427</td>
+          <td>FlipVertical</td>
+          <td>210</td>
+          <td>9</td>
+          <td>948</td>
+          <td>348</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>We have still have two possibilities to arange these pieces.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 FlipVertical <br />
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2311 FlipVertical <br />
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2729 FlipVertical <br />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            1427 FlipVertical <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 Clockwise90 <br />
+            <img
+              src="./tile-transformations/1951_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2729 Clockwise90 <br />
+            <img
+              src="./tile-transformations/2729_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2311_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2311 Clockwise90 <br />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            1427 Clockwise90 <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="finding-the-top-right-corner-piece">
+      finding the top right corner piece
+    </h4>
+    <p>
+      We can now look for the top right corner piece with one added constraint.
+      Its left edge has to match the right edge of (1,0). The transformation has
+      to orient the tile in a way that the top and right faces point outwards.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2971</td>
+          <td>Clockwise90</td>
+          <td>78</td>
+          <td>85</td>
+          <td>689</td>
+          <td>161</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>NoOp</td>
+          <td>702</td>
+          <td>616</td>
+          <td>184</td>
+          <td>264</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Still two possibilities to arrange our tiles.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 FlipVertical <br />
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2311 FlipVertical <br />
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            3079 NoOp <br />
+            <img
+              src="./tile-transformations/3079_NoOp.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2729 FlipVertical <br />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2729 FlipVertical <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 Clockwise90 <br />
+            <img
+              src="./tile-transformations/1951_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2729 Clockwise90 <br />
+            <img
+              src="./tile-transformations/2729_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2971 Clockwise90 <br />
+            <img
+              src="./tile-transformations/2971_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2311_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            2311 Clockwise90 <br />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+            <br />
+            1427 Clockwise90 <br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="finding-the-bottom-left-corner-piece">
+      finding the bottom left corner piece
+    </h4>
+    <p>
+      We can now look for the bottom left corner piece with one added
+      constraint. Its top edge has to match the bottom edge of (0,1). The
+      transformation has to orient the tile in a way that the bottom and left
+      faces point outwards.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2971</td>
+          <td>FlipVertical</td>
+          <td>85</td>
+          <td>78</td>
+          <td>161</td>
+          <td>689</td>
+        </tr>
+        <tr>
+          <td>3079</td>
+          <td>FlipVertical, Clockwise90</td>
+          <td>616</td>
+          <td>702</td>
+          <td>264</td>
+          <td>184</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 FlipVertical <br />
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2311 FlipVertical <br />
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>
+            <img
+              src="./tile-transformations/2971_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            1951 Clockwise90 <br />
+            <img
+              src="./tile-transformations/1951_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            2729 Clockwise90 <br />
+            <img
+              src="./tile-transformations/2729_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2311_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_Clockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>
+            <img
+              src="./tile-transformations/3079_FlipVerticalClockwise90.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="mirrored-symmetry">mirrored symmetry</h3>
+    <p>
+      We see that it&#39;s going to continue to find two possibilities, since
+      the whole thing can be mirrored. For completing the example we just pick
+      the first configuration. For that we place 2971 at (2,0) and 3079 at
+      (0,2).
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>1951 FlipVertical</td>
+          <td>2311 FlipVertical</td>
+          <td>3079 NoOp</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>2729 FlipVertical</td>
+          <td>1427 FlipVertical</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>2971 FlipVertical</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/3079_NoOp.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>
+            <img
+              src="./tile-transformations/2971_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="continue-to-fill-the-missing-pieces">
+      continue to fill the missing pieces
+    </h3>
+    <h4 id="-1-2-">(1,2)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1489</td>
+          <td>FlipVertical</td>
+          <td>948</td>
+          <td>689</td>
+          <td>848</td>
+          <td>288</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/3079_NoOp.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>
+            <img
+              src="./tile-transformations/2971_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1489_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="-2-1-">(2,1)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2473</td>
+          <td>Clockwise90, FlipVertical</td>
+          <td>184</td>
+          <td>348</td>
+          <td>399</td>
+          <td>481</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/3079_NoOp.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/2473_Clockwise90FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>
+            <img
+              src="./tile-transformations/2971_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1489_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="-2-2-">(2,2)</h4>
+    <p>Yay - our last cornerpiece</p>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>transformation</th>
+          <th>top</th>
+          <th>left</th>
+          <th>bottom</th>
+          <th>right</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1171</td>
+          <td>FlipHorizontal</td>
+          <td>399</td>
+          <td>288</td>
+          <td>96</td>
+          <td>902</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="the-last-piece">the last piece</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>y\x</th>
+          <th>0</th>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>
+            <img
+              src="./tile-transformations/1951_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/2311_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/3079_NoOp.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>
+            <img
+              src="./tile-transformations/2729_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1427_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/2473_Clockwise90FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>
+            <img
+              src="./tile-transformations/2971_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1489_FlipVertical.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./tile-transformations/1171_FlipHorizontal.png"
+              width="150"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="generalizing-the-rules">generalizing the rules</h3>
+    <ul>
+      <li>
+        pick one of the cornerpieces for (0,0) and orient it
+        <ul>
+          <li>top and left edges must face outwards</li>
+          <li>
+            if there are more than one possible transformation, pick one of them
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <pre><code class="lang-scala">  val filterFn: <span class="hljs-function">(<span class="hljs-params">(Int, Edge, List[Transformation], BufferedImage</span>)) =&gt;</span> <span class="hljs-built_in">Boolean</span> = { row =&gt;
+    (useTopTileFilter, useLeftTileFilter) match {
+      <span class="hljs-keyword">case</span> <span class="hljs-function">(<span class="hljs-params"><span class="hljs-literal">true</span>, <span class="hljs-literal">true</span></span>)   =&gt;</span> topTileFilter(row) &amp;&amp; leftTileFilter(row)
+      <span class="hljs-keyword">case</span> <span class="hljs-function">(<span class="hljs-params"><span class="hljs-literal">true</span>, <span class="hljs-literal">false</span></span>)  =&gt;</span> topTileFilter(row) &amp;&amp; leftOuterFilter(row)
+      <span class="hljs-keyword">case</span> <span class="hljs-function">(<span class="hljs-params"><span class="hljs-literal">false</span>, <span class="hljs-literal">true</span></span>)  =&gt;</span> leftTileFilter(row) &amp;&amp; topOuterFilter(row)
+      <span class="hljs-keyword">case</span> <span class="hljs-function">(<span class="hljs-params"><span class="hljs-literal">false</span>, <span class="hljs-literal">false</span></span>) =&gt;</span> topOuterFilter(row) &amp;&amp; leftOuterFilter(row)
+    }
+  }
+</code></pre>
+    <h2 id="finding-nessi">finding Nessi</h2>
+    <h3 id="the-final-assembly">the final assembly</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>
+            assembled image <br />
+            with borders
+          </th>
+          <th>
+            assembled image <br />
+            with highlighted border
+          </th>
+          <th>
+            final version <br />
+            with borders removed
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <img
+              src="./final-images/final_with_borders_NoOp.png"
+              height="330"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./final-images/final_with_red_borders_NoOp.png"
+              height="330"
+              style="image-rendering: pixelated"
+            />
+          </td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_NoOp.png"
+              width="264"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- with borders -->
+    <!-- (10) * 3 = 30 -->
+    <!-- with red grid -->
+    <!-- 1 + (10 + 1) * 3 = 34 -->
+    <!-- without borders -->
+    <!-- (10 -2) * 3 = 24 -->
+    <h3 id="nessi">nessi</h3>
+    <p>
+      We have to find this pattern in the final image, but (of course) we
+      don&#39;t know how the image has been transformed.
+    </p>
+    <pre><code class="lang-text">                  #
+#    ##    ##    ###
+ #  #  #  #  #  #
+</code></pre>
+    <p>
+      <img
+        src="./sea_monster.png"
+        width="220"
+        style="image-rendering: pixelated"
+      />
+    </p>
+    <p>
+      We transform the image in all 8 ways and search for the pattern in each
+      image.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>transformations</th>
+          <th>image</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>NoOp</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_NoOp.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>Clockwise90</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_Clockwise90.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>Clockwise180</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_Clockwise180.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>Clockwise270</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_Clockwise270.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>FlipHorizontal</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_FlipHorizontal.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>FlipVertical</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_FlipVertical.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>FlipVerticalClockwise90</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_FlipVerticalClockwise90.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>Clockwise90FlipVertical</td>
+          <td>
+            <img
+              src="./final-images/final_without_borders_Clockwise90FlipVertical.png"
+              height="120"
+              style="image-rendering: pixelated"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="the-final-image">The final image</h2>
+    <p>
+      <img
+        src="./solved/final_image_FlipVerticalClockwise90.png"
+        height="120"
+        style="image-rendering: pixelated"
+      />
+    </p>
+    <p>
+      We need to count the number of water-pixels that are not occupied by a sea
+      monster. I don&#39;t know if the sea monsters would overlap, so I selected
+      all sea-monster pixels and diffed it with all water-pixels.
+    </p>
+    <p>
+      <img
+        src="./solved/final_image_colored.png"
+        height="360"
+        style="image-rendering: pixelated"
+      />
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>sea-monster sightings</th>
+          <th>sea-monster pixels</th>
+          <th>water pixels</th>
+          <th>diff</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2</td>
+          <td>30</td>
+          <td>303</td>
+          <td>273 (our answer)</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 id="solution-for-part-2">Solution for part 2</h2>
+    <p>The solution for the random seed of my user looked like this</p>
+    <p>
+      <img
+        src="./real-input/solved/final_image_colored.png"
+        height="520"
+        style="image-rendering: pixelated"
+      />
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>sea-monster sightings</th>
+          <th>sea-monster pixels</th>
+          <th>water pixels</th>
+          <th>diff</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>19</td>
+          <td>285</td>
+          <td>1914</td>
+          <td>1629 (our answer)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Turned out there were no overlapping sea monsters ;-)</p>
+    <p>
+      Great fun, but quite complex to solve. I could have done it a lot simpler,
+      but I enjoyed the programming with graphics.
+    </p>
+  </body>
+</html>
