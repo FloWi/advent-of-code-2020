@@ -1,8 +1,11 @@
 package day23
+import com.typesafe.scalalogging.{LazyLogging, Logger}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-class CircularListTest extends AnyFunSuite with Matchers {
+import scala.util.Random
+
+class CircularListTest extends AnyFunSuite with Matchers with LazyLogging {
 
   test("creating an empty list should have no tail") {
     val l = CircularList.create[Int]()
@@ -76,7 +79,7 @@ class CircularListTest extends AnyFunSuite with Matchers {
     val n2 = l.append(2)
     val n1 = l.append(1)
     val n3 = l.append(3)
-    l.allElements.map(_.value) shouldBe List(2, 1, 3)
+    l.allElementsHeadToTail.map(_.value) shouldBe List(2, 1, 3)
   }
 
   test("remove should update state of the world accordingly") {
@@ -86,10 +89,10 @@ class CircularListTest extends AnyFunSuite with Matchers {
     l.append(3)
 
     val unlinkedList = l.unlinkAfter(a = 1, n = 1)
-    val actual = l.allElements.map(_.value)
+    val actual = l.allElementsHeadToTail.map(_.value)
 
     actual shouldBe List(1, 3)
-    unlinkedList.allElements.map(_.value) shouldBe List(2)
+    unlinkedList.allElementsHeadToTail.map(_.value) shouldBe List(2)
 
   }
 
@@ -101,8 +104,8 @@ class CircularListTest extends AnyFunSuite with Matchers {
     l.append(4)
 
     val unlinkedList = l.unlinkAfter(a = 3, n = 1)
-    l.allElements.map(_.value) shouldBe List(1, 2, 3)
-    unlinkedList.allElements.map(_.value) shouldBe List(4)
+    l.allElementsHeadToTail.map(_.value) shouldBe List(1, 2, 3)
+    unlinkedList.allElementsHeadToTail.map(_.value) shouldBe List(4)
   }
 
   test("remove 2 elements from n-1 should update both head and tail") {
@@ -113,8 +116,79 @@ class CircularListTest extends AnyFunSuite with Matchers {
     l.append(4) // will be removed
 
     val unlinkedList = l.unlinkAfter(a = 3, n = 2)
-    l.allElements.map(_.value) shouldBe List(2, 3)
-    unlinkedList.allElements.map(_.value) shouldBe List(4, 1)
+    l.allElementsHeadToTail.map(_.value) shouldBe List(2, 3)
+    unlinkedList.allElementsHeadToTail.map(_.value) shouldBe List(4, 1)
+  }
+
+  test("removing and adding again should yield all elements again. Tail might be different though") {
+
+    val testValues = List(1, 2, 3, 4)
+
+    val l = CircularList.create[Int]()
+    testValues.foreach(l.append)
+
+    val unlinked = l.unlinkAfter(a = 3, n = 2)
+
+    l.linkAfter(3, unlinked)
+    l.allElementsHeadToTail.map(_.value) should contain theSameElementsInOrderAs List(4, 1, 2, 3)
+    val head = l.allElementsHeadToTail.head
+    head.value shouldBe 4
+    head.next.value shouldBe 1
+    head.next.next.value shouldBe 2
+    head.next.next.next.value shouldBe 3
+    head.next.next.next.next.value shouldBe 4
+
+    //make sure, all elements are in the map
+    testValues.foreach { t =>
+      l.find(t).map(_.value).get shouldBe t
+    }
+
+  }
+
+  test("stresstest") {
+
+    //  750ms     for 1k elements with 1M iterations :)
+    //0:04min     for 1k elements with 10M iterations :)
+    //0:40min     for 1k elements with 100M iterations :)
+
+    //1,86s       for 1M elements with 1M iterations :)
+    //0:12min     for 1M elements with 10M iterations :)
+    //2:16min     for 1M elements with 100M iterations :)
+
+    val l = CircularList.create[Int]()
+    val numberElements = 1000 * 1000
+    val numberIterations = 1 * 1000 * 1000
+
+    logger.debug(s"creating a circular list with $numberElements")
+    1.to(numberElements).foreach(l.append)
+    logger.debug(s"done creating a circular list with $numberElements")
+
+    val lazyRandoms = LazyList.continually(1 + Random.nextInt(numberElements))
+
+    logger.debug(s"iterating $numberIterations")
+
+    1.to(numberIterations).foreach { i =>
+      //pick a random number
+      if (i % 1000000 == 0) {
+        logger.debug(s"   at iteration $i")
+
+      }
+
+      val start = 1 + Random.nextInt(numberElements)
+      val removed = l.unlinkAfter(start, 3)
+
+      val randomInsert = lazyRandoms.find(r => removed.find(r).isEmpty).get
+      l.linkAfter(randomInsert, removed)
+    }
+
+    logger.debug(s"done iterating $numberIterations")
+
+    logger.debug(s"validating $numberElements elements")
+
+    1.to(numberElements).foreach { i =>
+      l.find(i).isDefined shouldBe true
+    }
+    logger.debug(s"done validating $numberElements elements")
   }
 
 }

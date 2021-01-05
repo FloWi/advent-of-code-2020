@@ -15,7 +15,7 @@ object Node {
 
 }
 
-case class CircularList[A] private (private var maybeTail: Option[Node[A]], private var map: collection.mutable.HashMap[A, Node[A]]) {
+case class CircularList[A] private (private var maybeTail: Option[Node[A]], private var nodeMap: collection.mutable.HashMap[A, Node[A]]) {
 
   def tail: Option[Node[A]] = maybeTail
 
@@ -33,9 +33,47 @@ case class CircularList[A] private (private var maybeTail: Option[Node[A]], priv
 
     }
 
-    map.update(a, n)
+    nodeMap.update(a, n)
     maybeTail = Some(n)
     n
+  }
+
+  def linkAfter(value: A, ringToAdd: CircularList[A]): Unit = {
+
+    /*
+    ring 1
+
+    a  --> aNext
+
+    ring2
+    tail2 --> head2
+
+    new ring
+    a --> head2 ... --> tail2 --> aNext
+     */
+
+    if (ringToAdd.nodeMap.keySet.intersect(nodeMap.keySet).nonEmpty) {
+      throw new RuntimeException("elements in both ring must be unique")
+    }
+
+    find(value) match {
+      case None => throw new IllegalArgumentException(s"A '$value' wasn't found in the list")
+      case Some(a) =>
+        ringToAdd.maybeTail match {
+          case None => //nothing to do here, since the ring is empty
+
+          case Some(tail2) =>
+            val head2 = tail2.next
+
+            val aNext = a.next
+            a.next = head2
+            tail2.next = aNext
+
+            nodeMap.addAll(ringToAdd.nodeMap)
+
+        }
+
+    }
   }
 
   def unlinkAfter(a: A, n: Int): CircularList[A] = {
@@ -43,7 +81,7 @@ case class CircularList[A] private (private var maybeTail: Option[Node[A]], priv
     find(a) match {
       case None => CircularList.create[A]()
       case Some(node) =>
-        val length = map.size
+        val length = nodeMap.size
         val numberToRemove = n % length
 
         take(numberToRemove, Some(node.next)) match {
@@ -56,7 +94,7 @@ case class CircularList[A] private (private var maybeTail: Option[Node[A]], priv
             }
             val newMap = collection.mutable.HashMap.empty[A, Node[A]]
             removed.foreach { n =>
-              map.remove(n.value)
+              nodeMap.remove(n.value)
               newMap.update(n.value, n)
             }
             maybeTail = newTail
@@ -82,7 +120,7 @@ case class CircularList[A] private (private var maybeTail: Option[Node[A]], priv
     }
   }
 
-  def allElements: List[Node[A]] = {
+  def allElementsHeadToTail: List[Node[A]] = {
     maybeTail match {
       case Some(tail) => takeWhile(tail.next, n => n != tail)
       case None       => List.empty
@@ -103,7 +141,7 @@ case class CircularList[A] private (private var maybeTail: Option[Node[A]], priv
   }
 
   def find(value: A): Option[Node[A]] =
-    map.get(value)
+    nodeMap.get(value)
 
 }
 
