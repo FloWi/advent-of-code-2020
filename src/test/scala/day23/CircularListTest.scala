@@ -147,13 +147,14 @@ class CircularListTest extends AnyFunSuite with Matchers with LazyLogging {
 
   test("stresstest") {
 
-    //  750ms     for 1k elements with 1M iterations :)
-    //0:04min     for 1k elements with 10M iterations :)
-    //0:40min     for 1k elements with 100M iterations :)
+    // results :D
+    //  750ms  for 1k elements with 1M iterations
+    //0:04min  for 1k elements with 10M iterations
+    //0:40min  for 1k elements with 100M iterations
 
-    //1,86s       for 1M elements with 1M iterations :)
-    //0:12min     for 1M elements with 10M iterations :)
-    //2:16min     for 1M elements with 100M iterations :)
+    //1,86s    for 1M elements with 1M iterations
+    //0:12min  for 1M elements with 10M iterations
+    //2:16min  for 1M elements with 100M iterations
 
     val l = CircularList.create[Int]()
     val numberElements = 1000 * 1000

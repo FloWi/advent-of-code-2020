@@ -17,6 +17,10 @@ object Node {
 
 case class CircularList[A] private (private var maybeTail: Option[Node[A]], private var nodeMap: collection.mutable.HashMap[A, Node[A]]) {
 
+  def size: Int = nodeMap.size
+
+  def contains(a: A): Boolean = nodeMap.contains(a)
+
   def tail: Option[Node[A]] = maybeTail
 
   def append(a: A): Node[A] = {
@@ -148,5 +152,11 @@ case class CircularList[A] private (private var maybeTail: Option[Node[A]], priv
 object CircularList {
 
   def create[A]() = new CircularList[A](None, collection.mutable.HashMap.empty)
+
+  def create[A](elements: List[A]) = {
+    val l = new CircularList[A](None, collection.mutable.HashMap.empty)
+    elements.foreach(l.append)
+    l
+  }
 
 }
